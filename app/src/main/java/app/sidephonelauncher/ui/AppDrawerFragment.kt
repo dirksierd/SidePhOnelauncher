@@ -114,6 +114,7 @@ class AppDrawerFragment : Fragment() {
             if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
             if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
                 focusFirstLaunchableItem()
+                true
             } else {
                 false
             }
@@ -122,7 +123,10 @@ class AppDrawerFragment : Fragment() {
         searchTextView?.setOnKeyListener { _, keyCode, event ->
             if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
             when (keyCode) {
-                KeyEvent.KEYCODE_DPAD_DOWN -> focusFirstLaunchableItem()
+                KeyEvent.KEYCODE_DPAD_DOWN -> {
+                    focusFirstLaunchableItem()
+                    true
+                }
                 KeyEvent.KEYCODE_DPAD_LEFT -> {
                     val textView = searchTextView
                     val selectionStart = textView?.selectionStart ?: -1
@@ -162,7 +166,7 @@ class AppDrawerFragment : Fragment() {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (query?.startsWith("!") == true)
                     requireContext().openUrl(Constants.URL_DUCK_SEARCH + query.replace(" ", "%20"))
-                else if (adapter.itemCount == 0)
+                else if (!adapter.hasLaunchableResults())
                     requireContext().openSearch(query?.trim())
                 else
                     adapter.launchFirstInList()
@@ -442,9 +446,16 @@ class AppDrawerFragment : Fragment() {
             viewModel.checkForMessages.call()
     }
 
+    private fun requestInitialSearchFocus() {
+        binding.search.post {
+            searchTextView?.requestFocus() ?: binding.search.requestFocus()
+        }
+    }
+
     override fun onStart() {
         super.onStart()
         cachedIsCjkKeyboard = null
+        requestInitialSearchFocus()
         binding.search.showKeyboard(prefs.autoShowKeyboard)
     }
 

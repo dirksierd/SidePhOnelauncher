@@ -4,12 +4,15 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.os.Process
+import android.text.InputType
 import android.text.Spannable
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.BaseInputConnection
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
@@ -77,6 +80,41 @@ class AppDrawerFragment : Fragment() {
         initAdapter()
         initObservers()
         initClickListeners()
+        initKeyNavigation()
+    }
+
+    private fun initKeyNavigation() {
+        binding.recyclerView.setOnKeyListener { _, keyCode, event ->
+            if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
+            when (keyCode) {
+                KeyEvent.KEYCODE_DPAD_UP -> {
+                    if (!binding.recyclerView.canScrollVertically(-1)) {
+                        val firstVisible = (binding.recyclerView.layoutManager as? LinearLayoutManager)
+                            ?.findFirstVisibleItemPosition() ?: -1
+                        if (firstVisible <= 0) {
+                            binding.search.requestFocus()
+                            return@setOnKeyListener true
+                        }
+                    }
+                    false
+                }
+                KeyEvent.KEYCODE_DEL -> {
+                    val query = binding.search.query
+                    if (query.isNullOrEmpty()) {
+                        findNavController().popBackStack()
+                        true
+                    } else false
+                }
+                else -> false
+            }
+        }
+
+        binding.search.setOnKeyListener { _, keyCode, event ->
+            if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
+            if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                focusFirstLaunchableItem()
+            } else false
+        }
     }
 
     private fun initViews() {
@@ -87,6 +125,10 @@ class AppDrawerFragment : Fragment() {
         try {
             searchTextView = binding.search.findViewById(R.id.search_src_text)
             searchTextView?.gravity = prefs.appLabelAlignment
+            searchTextView?.inputType =
+                InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            searchTextView?.imeOptions =
+                EditorInfo.IME_ACTION_SEARCH or EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -135,8 +177,8 @@ class AppDrawerFragment : Fragment() {
             val subtype = imm.currentInputMethodSubtype
             val language = when {
                 subtype == null -> ""
-                subtype.languageTag.isNotEmpty() -> subtype.languageTag // e.g. "zh-CN", "ja-JP", "en-US"
-                else -> subtype.locale // deprecated fallback, e.g. "zh_CN"
+                subtype.languageTag.isNotEmpty() -> subtype.languageTag
+                else -> subtype.locale
             }
             language.startsWith("zh") || language.startsWith("ja") || language.startsWith("ko")
         } catch (e: Exception) {
@@ -260,8 +302,7 @@ class AppDrawerFragment : Fragment() {
     }
 
     private fun initObservers() {
-        viewModel.firstOpen.observe(viewLifecycleOwner) {
-        }
+        viewModel.firstOpen.observe(viewLifecycleOwner) {}
         if (flag == Constants.FLAG_HIDDEN_APPS) {
             viewModel.hiddenApps.observe(viewLifecycleOwner) {
                 it?.let {
@@ -305,6 +346,26 @@ class AppDrawerFragment : Fragment() {
         adapter.filter.filter(binding.search.query)
     }
 
+    private fun findFirstLaunchablePosition(): Int {
+        return adapter.appFilteredList.indexOfFirst { appModel ->
+            appModel !is AppModel.PrivateSpaceHeader && appModel.appPackage.isNotBlank()
+        }.takeIf { it >= 0 } ?: RecyclerView.NO_POSITION
+    }
+
+    private fun focusFirstLaunchableItem(): Boolean {
+        val position = findFirstLaunchablePosition()
+        if (position == RecyclerView.NO_POSITION) return false
+
+        binding.recyclerView.requestFocus()
+        binding.recyclerView.scrollToPosition(position)
+        binding.recyclerView.post {
+            val holder = binding.recyclerView.findViewHolderForAdapterPosition(position)
+            val itemView = holder?.itemView?.findViewById<View>(R.id.appRow) ?: holder?.itemView
+            itemView?.requestFocus()
+        }
+        return true
+    }
+
     private fun initClickListeners() {
         binding.appRename.setOnClickListener {
             val name = binding.search.query.toString().trim()
@@ -330,19 +391,16 @@ class AppDrawerFragment : Fragment() {
 
     private fun getRecyclerViewOnScrollListener(): RecyclerView.OnScrollListener {
         return object : RecyclerView.OnScrollListener() {
-
             var onTop = false
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 when (newState) {
-
                     RecyclerView.SCROLL_STATE_DRAGGING -> {
                         onTop = !recyclerView.canScrollVertically(-1)
                         if (onTop)
                             binding.search.hideKeyboard()
                     }
-
                     RecyclerView.SCROLL_STATE_IDLE -> {
                         if (!recyclerView.canScrollVertically(1))
                             binding.search.hideKeyboard()

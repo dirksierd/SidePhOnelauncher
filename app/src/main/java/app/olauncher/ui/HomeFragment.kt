@@ -9,6 +9,7 @@ import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -59,6 +60,9 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
+    private var dpadLeftKeyDownTime = 0L
+    private var dpadRightKeyDownTime = 0L
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
@@ -77,28 +81,29 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         setHomeAlignment(prefs.homeAlignment)
         initSwipeTouchListener()
         initClickListeners()
+        initKeyNavigation()
     }
 
     override fun onResume() {
         super.onResume()
+        dpadLeftKeyDownTime = 0L
+        dpadRightKeyDownTime = 0L
         populateHomeScreen(false)
         viewModel.isOlauncherDefault()
         if (prefs.showStatusBar) showStatusBar()
         else hideStatusBar()
+        requestInitialFocus()
     }
 
     override fun onClick(view: View) {
         when (view.id) {
             R.id.lock -> {}
-            // Home button for recents feature disabled
-            // R.id.recents -> {}
             R.id.clock -> openClockApp()
             R.id.date -> openCalendarApp()
             R.id.setDefaultLauncher -> viewModel.resetLauncherLiveData.call()
             R.id.tvScreenTime -> openScreenTimeDigitalWellbeing()
-
             else -> {
-                try { // Launch app
+                try {
                     val appLocation = view.tag.toString().toInt()
                     homeAppClicked(appLocation)
                 } catch (e: Exception) {
@@ -148,21 +153,18 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 prefs.clockAppClassName = ""
                 prefs.clockAppUser = ""
             }
-
             R.id.date -> {
                 showAppList(Constants.FLAG_SET_CALENDAR_APP)
                 prefs.calendarAppPackage = ""
                 prefs.calendarAppClassName = ""
                 prefs.calendarAppUser = ""
             }
-
             R.id.tvScreenTime -> {
                 showAppList(Constants.FLAG_SET_SCREEN_TIME_APP)
                 prefs.screenTimeAppPackage = ""
                 prefs.screenTimeAppClassName = ""
                 prefs.screenTimeAppUser = ""
             }
-
             R.id.setDefaultLauncher -> {
                 prefs.hideSetDefaultLauncher = true
                 binding.setDefaultLauncher.visibility = View.GONE
@@ -205,10 +207,105 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         viewModel.screenTimeValue.observe(viewLifecycleOwner) {
             it?.let { binding.tvScreenTime.text = it }
         }
-        // Home button for recents feature disabled
-        // viewModel.showRecentApps.observe(viewLifecycleOwner) {
-        //     binding.recents.performClick()
-        // }
+    }
+
+    private fun initKeyNavigation() {
+        binding.mainLayout.isFocusable = true
+        binding.mainLayout.setOnKeyListener { _, keyCode, event ->
+            handleHomeKeyEvent(keyCode, event)
+        }
+    }
+
+    private fun handleHomeKeyEvent(keyCode: Int, event: KeyEvent): Boolean {
+        val visibleApps = getVisibleHomeApps()
+        if (visibleApps.isEmpty()) return false
+
+        val focusedIndex = visibleApps.indexOf(activity?.currentFocus)
+
+        when (event.action) {
+            KeyEvent.ACTION_DOWN -> {
+                when (keyCode) {
+                    KeyEvent.KEYCODE_DPAD_UP -> {
+                        if (event.repeatCount > 0) return true
+                        if (focusedIndex > 0) {
+                            visibleApps[focusedIndex - 1].requestFocus()
+                        } else {
+                            swipeDownAction()
+                        }
+                        return true
+                    }
+                    KeyEvent.KEYCODE_DPAD_DOWN -> {
+                        if (event.repeatCount > 0) return true
+                        if (focusedIndex < visibleApps.size - 1) {
+                            visibleApps[focusedIndex + 1].requestFocus()
+                        } else if (focusedIndex == visibleApps.size - 1) {
+                            showAppList(Constants.FLAG_LAUNCH_APP)
+                        }
+                        return true
+                    }
+                    KeyEvent.KEYCODE_DPAD_LEFT -> {
+                        if (dpadLeftKeyDownTime == 0L) dpadLeftKeyDownTime = System.currentTimeMillis()
+                        if (event.repeatCount > 0) {
+                            val elapsed = System.currentTimeMillis() - dpadLeftKeyDownTime
+                            if (elapsed >= Constants.LONG_PRESS_DELAY_MS) {
+                                dpadLeftKeyDownTime = 0L
+                                openSwipeLeftApp()
+                            }
+                        }
+                        return true
+                    }
+                    KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                        if (dpadRightKeyDownTime == 0L) dpadRightKeyDownTime = System.currentTimeMillis()
+                        if (event.repeatCount > 0) {
+                            val elapsed = System.currentTimeMillis() - dpadRightKeyDownTime
+                            if (elapsed >= Constants.LONG_PRESS_DELAY_MS) {
+                                dpadRightKeyDownTime = 0L
+                                openSwipeRightApp()
+                            }
+                        }
+                        return true
+                    }
+                    KeyEvent.KEYCODE_DPAD_CENTER,
+                    KeyEvent.KEYCODE_ENTER,
+                    KeyEvent.KEYCODE_NUMPAD_ENTER -> return false
+                }
+            }
+            KeyEvent.ACTION_UP -> {
+                when (keyCode) {
+                    KeyEvent.KEYCODE_DPAD_DOWN -> return true
+                    KeyEvent.KEYCODE_DPAD_LEFT -> {
+                        dpadLeftKeyDownTime = 0L
+                        return true
+                    }
+                    KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                        dpadRightKeyDownTime = 0L
+                        return true
+                    }
+                    KeyEvent.KEYCODE_DPAD_CENTER,
+                    KeyEvent.KEYCODE_ENTER,
+                    KeyEvent.KEYCODE_NUMPAD_ENTER -> return false
+                }
+            }
+        }
+        return false
+    }
+
+    private fun requestInitialFocus() {
+        if (binding.mainLayout.isInTouchMode) return
+        getVisibleHomeApps().firstOrNull()?.requestFocus()
+    }
+
+    private fun getVisibleHomeApps(): List<View> {
+        return listOf(
+            binding.homeApp1,
+            binding.homeApp2,
+            binding.homeApp3,
+            binding.homeApp4,
+            binding.homeApp5,
+            binding.homeApp6,
+            binding.homeApp7,
+            binding.homeApp8,
+        ).filter { it.visibility == View.VISIBLE }
     }
 
     private fun initSwipeTouchListener() {
@@ -226,8 +323,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     private fun initClickListeners() {
         binding.lock.setOnClickListener(this)
-        // Home button for recents feature disabled
-        // binding.recents.setOnClickListener(this)
         binding.clock.setOnClickListener(this)
         binding.date.setOnClickListener(this)
         binding.clock.setOnLongClickListener(this)
@@ -236,6 +331,55 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         binding.setDefaultLauncher.setOnLongClickListener(this)
         binding.tvScreenTime.setOnClickListener(this)
         binding.tvScreenTime.setOnLongClickListener(this)
+
+        listOf(
+            binding.homeApp1,
+            binding.homeApp2,
+            binding.homeApp3,
+            binding.homeApp4,
+            binding.homeApp5,
+            binding.homeApp6,
+            binding.homeApp7,
+            binding.homeApp8,
+        ).forEach { homeApp ->
+            homeApp.setOnClickListener(this)
+            homeApp.setOnLongClickListener(this)
+            homeApp.setOnKeyListener { view, keyCode, event ->
+                when (keyCode) {
+                    KeyEvent.KEYCODE_DPAD_DOWN -> {
+                        if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener true
+                        if (event.repeatCount > 0) return@setOnKeyListener true
+                        val visibleApps = getVisibleHomeApps()
+                        val focusedIndex = visibleApps.indexOf(view)
+                        if (focusedIndex < 0) return@setOnKeyListener true
+                        if (focusedIndex < visibleApps.size - 1) {
+                            visibleApps[focusedIndex + 1].requestFocus()
+                        } else {
+                            showAppList(Constants.FLAG_LAUNCH_APP)
+                        }
+                        true
+                    }
+                    KeyEvent.KEYCODE_ENTER,
+                    KeyEvent.KEYCODE_DPAD_CENTER,
+                    KeyEvent.KEYCODE_NUMPAD_ENTER -> {
+                        when (event.action) {
+                            KeyEvent.ACTION_DOWN -> {
+                                if (event.repeatCount > 0) {
+                                    view.performLongClick()
+                                }
+                                true
+                            }
+                            KeyEvent.ACTION_UP -> {
+                                if (event.repeatCount == 0) view.performClick()
+                                true
+                            }
+                            else -> false
+                        }
+                    }
+                    else -> false
+                }
+            }
+        }
     }
 
     private fun setHomeAlignment(horizontalGravity: Int = prefs.homeAlignment) {
@@ -257,7 +401,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         binding.clock.isVisible = Constants.DateTime.isTimeVisible(prefs.dateTimeVisibility)
         binding.date.isVisible = Constants.DateTime.isDateVisible(prefs.dateTimeVisibility)
 
-//        var dateText = SimpleDateFormat("EEE, d MMM", Locale.getDefault()).format(Date())
         val dateFormat = SimpleDateFormat("EEE, d MMM", Locale.getDefault())
         var dateText = dateFormat.format(Date())
 
@@ -299,6 +442,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     private fun populateHomeScreen(appCountUpdated: Boolean) {
         if (appCountUpdated) hideHomeApps()
+        restoreHomeAppFocusability()
         populateDateTime()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
@@ -371,14 +515,10 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         isShortcut: Boolean,
         shortcutId: String?,
     ): Boolean {
-        // Get user handle for the app/shortcut
         val userHandle = getUserHandleFromString(requireContext(), userString)
 
-        // If it's a shortcut, verify it still exists
         if (isShortcut) {
             val launcherApps = requireContext().getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
-
-            // Query for the specific shortcut
             val query = LauncherApps.ShortcutQuery().apply {
                 setPackage(packageName)
                 setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED)
@@ -386,7 +526,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
             try {
                 val shortcuts = launcherApps.getShortcuts(query, userHandle)
-                // Check if our shortcut still exists
                 if (shortcuts?.any { it.id == shortcutId } == true) {
                     textView.text = appName
                     return true
@@ -400,7 +539,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             }
         }
 
-        // Regular app check
         if (isPackageInstalled(requireContext(), packageName, userString)) {
             textView.text = appName
             return true
@@ -409,15 +547,33 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         return false
     }
 
+    private fun restoreHomeAppFocusability() {
+        listOf(
+            binding.homeApp1,
+            binding.homeApp2,
+            binding.homeApp3,
+            binding.homeApp4,
+            binding.homeApp5,
+            binding.homeApp6,
+            binding.homeApp7,
+            binding.homeApp8,
+        ).forEach { it.isFocusable = true }
+    }
+
     private fun hideHomeApps() {
-        binding.homeApp1.visibility = View.GONE
-        binding.homeApp2.visibility = View.GONE
-        binding.homeApp3.visibility = View.GONE
-        binding.homeApp4.visibility = View.GONE
-        binding.homeApp5.visibility = View.GONE
-        binding.homeApp6.visibility = View.GONE
-        binding.homeApp7.visibility = View.GONE
-        binding.homeApp8.visibility = View.GONE
+        listOf(
+            binding.homeApp1,
+            binding.homeApp2,
+            binding.homeApp3,
+            binding.homeApp4,
+            binding.homeApp5,
+            binding.homeApp6,
+            binding.homeApp7,
+            binding.homeApp8,
+        ).forEach {
+            it.visibility = View.GONE
+            it.isFocusable = false
+        }
     }
 
     private fun launchAppOrShortcut(

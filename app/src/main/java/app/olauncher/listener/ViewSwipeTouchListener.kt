@@ -22,7 +22,7 @@ internal open class ViewSwipeTouchListener(c: Context?, v: View) : OnTouchListen
     override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
         when (motionEvent.action) {
             MotionEvent.ACTION_DOWN -> view.isPressed = true
-            MotionEvent.ACTION_UP -> view.isPressed = false
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> view.isPressed = false
         }
         return gestureDetector.onTouchEvent(motionEvent)
     }
@@ -36,8 +36,8 @@ internal open class ViewSwipeTouchListener(c: Context?, v: View) : OnTouchListen
         }
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
-            onClick(view)
-            return super.onSingleTapUp(e)
+            view.performClick()
+            return true
         }
 
         override fun onDoubleTap(e: MotionEvent): Boolean {
@@ -51,7 +51,7 @@ internal open class ViewSwipeTouchListener(c: Context?, v: View) : OnTouchListen
                 delay(Constants.LONG_PRESS_DELAY_MS)
                 withContext(Dispatchers.Main) {
                     if (isActive && longPressOn)
-                        onLongClick(view)
+                        view.performLongClick()
                 }
             }
             super.onLongPress(e)

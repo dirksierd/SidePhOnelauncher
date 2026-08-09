@@ -5,6 +5,7 @@ import android.content.pm.LauncherApps
 import android.os.UserHandle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -86,7 +87,6 @@ class AppDrawerAdapter(
                     false
                 )
             )
-
             else -> ViewHolder(
                 AdapterAppDrawerBinding.inflate(
                     LayoutInflater.from(parent.context),
@@ -109,7 +109,6 @@ class AppDrawerAdapter(
                         privateSpaceSettingsListener,
                     )
                 }
-
                 is ViewHolder -> holder.bind(
                     flag,
                     appLabelGravity,
@@ -184,7 +183,6 @@ class AppDrawerAdapter(
             .replace(separatorsRegex, "")
 
     fun setAppList(appsList: MutableList<AppModel>) {
-        // Add empty app for bottom padding in recyclerview and assign to list
         appsList.add(
             AppModel.App(
                 appLabel = "",
@@ -238,7 +236,6 @@ class AppDrawerAdapter(
             renameLayout.visibility = View.GONE
             appTitle.visibility = View.VISIBLE
 
-            // Show indicators in title based on app type and state
             appTitle.text = buildString {
                 append(appModel.appLabel)
                 if (appModel.isNew) append(" ✦")
@@ -246,9 +243,8 @@ class AppDrawerAdapter(
             appTitle.gravity = appLabelGravity
             otherProfileIndicator.isVisible = appModel.user != myUserHandle
 
-            appTitle.setOnClickListener { clickListener(appModel) }
-
-            appTitle.setOnLongClickListener {
+            appRow.setOnClickListener { clickListener(appModel) }
+            appRow.setOnLongClickListener {
                 if (appModel.appPackage.isNotEmpty()) {
                     appDelete.alpha = when (
                         appModel is AppModel.PinnedShortcut || !root.context.isSystemApp(appModel.appPackage, appModel.user)
@@ -266,13 +262,33 @@ class AppDrawerAdapter(
                         false -> 1.0f
                     }
                     appHideLayout.visibility = View.VISIBLE
-                    // Only allow renaming non hidden apps
                     appRename.isVisible = flag != Constants.FLAG_HIDDEN_APPS
                 }
                 true
             }
+            appRow.setOnKeyListener { _, keyCode, event ->
+                when (keyCode) {
+                    KeyEvent.KEYCODE_ENTER,
+                    KeyEvent.KEYCODE_DPAD_CENTER,
+                    KeyEvent.KEYCODE_NUMPAD_ENTER -> {
+                        when (event.action) {
+                            KeyEvent.ACTION_DOWN -> {
+                                if (event.repeatCount > 0) {
+                                    appRow.performLongClick()
+                                }
+                                true
+                            }
+                            KeyEvent.ACTION_UP -> {
+                                if (event.repeatCount == 0) appRow.performClick()
+                                true
+                            }
+                            else -> false
+                        }
+                    }
+                    else -> false
+                }
+            }
 
-            // Configure rename behavior
             appRename.setOnClickListener {
                 if (appModel.appPackage.isNotEmpty()) {
                     etAppRename.hint = getAppName(etAppRename.context, appModel.appPackage, appModel.user)
@@ -355,7 +371,7 @@ class AppDrawerAdapter(
                     ).toString()
                 }
             } catch (_: Exception) {
-                "" // As a fallback, display an empty string.
+                ""
             }
         }
     }

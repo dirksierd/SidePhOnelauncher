@@ -8,22 +8,12 @@
     android:orientation="vertical"
     tools:context=".ui.HomeFragment">
 
-    <!-- Placeholder layout for locking screen-->
     <FrameLayout
         android:id="@+id/lock"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:contentDescription="@string/lock_layout_description" />
 
-    <!-- Home button for recents feature disabled -->
-    <!-- Placeholder layout for showing recent apps
-    <FrameLayout
-        android:id="@+id/recents"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:contentDescription="@string/recents_layout_description" /> -->
-
-    <!-- Clock and calendar-->
     <LinearLayout
         android:id="@+id/dateTimeLayout"
         android:layout_width="match_parent"
@@ -41,6 +31,8 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-light"
             android:format12Hour="h:mm"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
             android:textSize="@dimen/time_size"
             tools:text="02:34" />
 
@@ -51,12 +43,12 @@
             android:layout_height="wrap_content"
             android:format12Hour="EEE, dd MMM"
             android:format24Hour="EEE, dd MMM"
-            android:paddingHorizontal="3dp"
+            android:paddingStart="7dp"
+            android:paddingEnd="7dp"
             android:textSize="@dimen/date_size"
             tools:text="Thu, 30 Dec" />
     </LinearLayout>
 
-    <!-- Screen time-->
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvScreenTime"
         style="@style/TextSmall"
@@ -72,7 +64,6 @@
         tools:text="2h 11m"
         tools:visibility="visible" />
 
-    <!-- Home apps-->
     <LinearLayout
         android:id="@+id/homeAppsLayout"
         android:layout_width="match_parent"
@@ -83,7 +74,7 @@
         android:paddingTop="112dp"
         android:paddingBottom="48dp">
 
-        <TextView
+        <app.olauncher.ui.HomeAppTextView
             android:id="@+id/homeApp1"
             style="@style/TextLarge"
             android:layout_width="wrap_content"
@@ -96,7 +87,7 @@
             android:visibility="gone"
             tools:visibility="visible" />
 
-        <TextView
+        <app.olauncher.ui.HomeAppTextView
             android:id="@+id/homeApp2"
             style="@style/TextLarge"
             android:layout_width="wrap_content"
@@ -109,7 +100,7 @@
             android:visibility="gone"
             tools:visibility="visible" />
 
-        <TextView
+        <app.olauncher.ui.HomeAppTextView
             android:id="@+id/homeApp3"
             style="@style/TextLarge"
             android:layout_width="wrap_content"
@@ -122,7 +113,7 @@
             android:visibility="gone"
             tools:visibility="visible" />
 
-        <TextView
+        <app.olauncher.ui.HomeAppTextView
             android:id="@+id/homeApp4"
             style="@style/TextLarge"
             android:layout_width="wrap_content"
@@ -135,7 +126,7 @@
             android:visibility="gone"
             tools:visibility="visible" />
 
-        <TextView
+        <app.olauncher.ui.HomeAppTextView
             android:id="@+id/homeApp5"
             style="@style/TextLarge"
             android:layout_width="wrap_content"
@@ -148,7 +139,7 @@
             android:visibility="gone"
             tools:visibility="visible" />
 
-        <TextView
+        <app.olauncher.ui.HomeAppTextView
             android:id="@+id/homeApp6"
             style="@style/TextLarge"
             android:layout_width="wrap_content"
@@ -161,7 +152,7 @@
             android:visibility="gone"
             tools:visibility="visible" />
 
-        <TextView
+        <app.olauncher.ui.HomeAppTextView
             android:id="@+id/homeApp7"
             style="@style/TextLarge"
             android:layout_width="wrap_content"
@@ -174,7 +165,7 @@
             android:visibility="gone"
             tools:visibility="visible" />
 
-        <TextView
+        <app.olauncher.ui.HomeAppTextView
             android:id="@+id/homeApp8"
             style="@style/TextLarge"
             android:layout_width="wrap_content"
@@ -202,7 +193,6 @@
         android:visibility="gone"
         tools:visibility="visible" />
 
-    <!-- Set default launcher -->
     <TextView
         android:id="@+id/setDefaultLauncher"
         style="@style/TextMedium"

@@ -32,6 +32,7 @@ import app.olauncher.data.AppModel
 import app.olauncher.data.Constants
 import app.olauncher.data.Prefs
 import app.olauncher.databinding.FragmentHomeBinding
+import app.olauncher.helper.NotificationDotRepository
 import app.olauncher.helper.appUsagePermissionGranted
 import app.olauncher.helper.dpToPx
 import app.olauncher.helper.expandNotificationDrawer
@@ -62,6 +63,11 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     private var dpadLeftKeyDownTime = 0L
     private var dpadRightKeyDownTime = 0L
+    private val notificationDotListener: () -> Unit = {
+        activity?.runOnUiThread {
+            if (_binding != null) updateHomeNotificationDots()
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
@@ -86,6 +92,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     override fun onResume() {
         super.onResume()
+        NotificationDotRepository.addListener(notificationDotListener)
         dpadLeftKeyDownTime = 0L
         dpadRightKeyDownTime = 0L
         populateHomeScreen(false)
@@ -386,14 +393,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val verticalGravity = if (prefs.homeBottomAlignment) Gravity.BOTTOM else Gravity.CENTER_VERTICAL
         binding.homeAppsLayout.gravity = horizontalGravity or verticalGravity
         binding.dateTimeLayout.gravity = horizontalGravity
-        binding.homeApp1.gravity = horizontalGravity
-        binding.homeApp2.gravity = horizontalGravity
-        binding.homeApp3.gravity = horizontalGravity
-        binding.homeApp4.gravity = horizontalGravity
-        binding.homeApp5.gravity = horizontalGravity
-        binding.homeApp6.gravity = horizontalGravity
-        binding.homeApp7.gravity = horizontalGravity
-        binding.homeApp8.gravity = horizontalGravity
+        homeAppTextViews().forEach { it.gravity = horizontalGravity }
     }
 
     private fun populateDateTime() {
@@ -452,56 +452,56 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         if (homeAppsNum == 0) return
 
         binding.homeApp1.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp1, prefs.appName1, prefs.appPackage1, prefs.appUser1, prefs.isShortcut1, prefs.shortcutId1)) {
+        if (!setHomeAppText(binding.homeApp1 as TextView, prefs.appName1, prefs.appPackage1, prefs.appUser1, prefs.isShortcut1, prefs.shortcutId1)) {
             prefs.appName1 = ""
             prefs.appPackage1 = ""
         }
         if (homeAppsNum == 1) return
 
         binding.homeApp2.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp2, prefs.appName2, prefs.appPackage2, prefs.appUser2, prefs.isShortcut2, prefs.shortcutId2)) {
+        if (!setHomeAppText(binding.homeApp2 as TextView, prefs.appName2, prefs.appPackage2, prefs.appUser2, prefs.isShortcut2, prefs.shortcutId2)) {
             prefs.appName2 = ""
             prefs.appPackage2 = ""
         }
         if (homeAppsNum == 2) return
 
         binding.homeApp3.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp3, prefs.appName3, prefs.appPackage3, prefs.appUser3, prefs.isShortcut3, prefs.shortcutId3)) {
+        if (!setHomeAppText(binding.homeApp3 as TextView, prefs.appName3, prefs.appPackage3, prefs.appUser3, prefs.isShortcut3, prefs.shortcutId3)) {
             prefs.appName3 = ""
             prefs.appPackage3 = ""
         }
         if (homeAppsNum == 3) return
 
         binding.homeApp4.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp4, prefs.appName4, prefs.appPackage4, prefs.appUser4, prefs.isShortcut4, prefs.shortcutId4)) {
+        if (!setHomeAppText(binding.homeApp4 as TextView, prefs.appName4, prefs.appPackage4, prefs.appUser4, prefs.isShortcut4, prefs.shortcutId4)) {
             prefs.appName4 = ""
             prefs.appPackage4 = ""
         }
         if (homeAppsNum == 4) return
 
         binding.homeApp5.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp5, prefs.appName5, prefs.appPackage5, prefs.appUser5, prefs.isShortcut5, prefs.shortcutId5)) {
+        if (!setHomeAppText(binding.homeApp5 as TextView, prefs.appName5, prefs.appPackage5, prefs.appUser5, prefs.isShortcut5, prefs.shortcutId5)) {
             prefs.appName5 = ""
             prefs.appPackage5 = ""
         }
         if (homeAppsNum == 5) return
 
         binding.homeApp6.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp6, prefs.appName6, prefs.appPackage6, prefs.appUser6, prefs.isShortcut6, prefs.shortcutId6)) {
+        if (!setHomeAppText(binding.homeApp6 as TextView, prefs.appName6, prefs.appPackage6, prefs.appUser6, prefs.isShortcut6, prefs.shortcutId6)) {
             prefs.appName6 = ""
             prefs.appPackage6 = ""
         }
         if (homeAppsNum == 6) return
 
         binding.homeApp7.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp7, prefs.appName7, prefs.appPackage7, prefs.appUser7, prefs.isShortcut7, prefs.shortcutId7)) {
+        if (!setHomeAppText(binding.homeApp7 as TextView, prefs.appName7, prefs.appPackage7, prefs.appUser7, prefs.isShortcut7, prefs.shortcutId7)) {
             prefs.appName7 = ""
             prefs.appPackage7 = ""
         }
         if (homeAppsNum == 7) return
 
         binding.homeApp8.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp8, prefs.appName8, prefs.appPackage8, prefs.appUser8, prefs.isShortcut8, prefs.shortcutId8)) {
+        if (!setHomeAppText(binding.homeApp8 as TextView, prefs.appName8, prefs.appPackage8, prefs.appUser8, prefs.isShortcut8, prefs.shortcutId8)) {
             prefs.appName8 = ""
             prefs.appPackage8 = ""
         }
@@ -528,23 +528,58 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 val shortcuts = launcherApps.getShortcuts(query, userHandle)
                 if (shortcuts?.any { it.id == shortcutId } == true) {
                     textView.text = appName
+                    updateHomeAppDot(textView, packageName)
                     return true
                 }
                 textView.text = ""
+                updateHomeAppDot(textView, null)
                 return false
             } catch (e: Exception) {
                 e.printStackTrace()
                 textView.text = ""
+                updateHomeAppDot(textView, null)
                 return false
             }
         }
 
         if (isPackageInstalled(requireContext(), packageName, userString)) {
             textView.text = appName
+            updateHomeAppDot(textView, packageName)
             return true
         }
         textView.text = ""
+        updateHomeAppDot(textView, null)
         return false
+    }
+
+    private fun updateHomeNotificationDots() {
+        updateHomeAppDot(binding.homeApp1 as TextView, prefs.appPackage1)
+        updateHomeAppDot(binding.homeApp2 as TextView, prefs.appPackage2)
+        updateHomeAppDot(binding.homeApp3 as TextView, prefs.appPackage3)
+        updateHomeAppDot(binding.homeApp4 as TextView, prefs.appPackage4)
+        updateHomeAppDot(binding.homeApp5 as TextView, prefs.appPackage5)
+        updateHomeAppDot(binding.homeApp6 as TextView, prefs.appPackage6)
+        updateHomeAppDot(binding.homeApp7 as TextView, prefs.appPackage7)
+        updateHomeAppDot(binding.homeApp8 as TextView, prefs.appPackage8)
+    }
+
+    private fun homeAppTextViews(): List<TextView> {
+        return listOf(
+            binding.homeApp1 as TextView,
+            binding.homeApp2 as TextView,
+            binding.homeApp3 as TextView,
+            binding.homeApp4 as TextView,
+            binding.homeApp5 as TextView,
+            binding.homeApp6 as TextView,
+            binding.homeApp7 as TextView,
+            binding.homeApp8 as TextView,
+        )
+    }
+
+    private fun updateHomeAppDot(textView: TextView, packageName: String?) {
+        (textView as? HomeAppTextView)?.setShowNotificationDot(
+            packageName.isNullOrBlank().not() && NotificationDotRepository.hasActiveNotification(packageName)
+        )
     }
 
     private fun restoreHomeAppFocusability() {
@@ -865,6 +900,11 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 textOnClick(view)
             }
         }
+    }
+
+    override fun onPause() {
+        NotificationDotRepository.removeListener(notificationDotListener)
+        super.onPause()
     }
 
     override fun onDestroyView() {

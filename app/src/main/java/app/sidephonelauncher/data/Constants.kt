@@ -16,6 +16,7 @@ object Constants {
         const val HIDDEN = "HIDDEN"
         const val KEYBOARD = "KEYBOARD"
         const val DIGITAL_WELLBEING = "DIGITAL_WELLBEING"
+        const val NOTIFICATION_DOTS = "NOTIFICATION_DOTS"
         const val PRO_MESSAGE = "PRO_MESSAGE"
     }
 

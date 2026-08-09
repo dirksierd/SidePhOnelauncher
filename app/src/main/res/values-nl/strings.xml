@@ -67,6 +67,9 @@
         \n\nZoek in de instellingen van je telefoon naar Digital Wellbeing en schakel het in.</string>
     <string name="app_usage_message">Om je schermtijd op het startscherm te tonen of te verbergen, geef of weiger de toestemming voor app-gebruik.
         \n\nOpmerking: er worden geen app-gebruiksgegevens verzameld. Alles wordt op je apparaat verwerkt.</string>
+    <string name="notification_dots">Notificatiebadge</string>
+    <string name="notification_dots_message">Om de notificatiebadge op het startscherm te tonen of te verbergen, geef of weiger toegang tot meldingen voor SidePhOnelauncher.
+        \n\nOpmerking: er worden geen meldingsgegevens verzameld. Alles wordt op je apparaat verwerkt.</string>
     <string name="pro_message">SidePhOnelauncher heeft ook een pro-versie genaamd Pro Launcher. Deze heeft extra functies zoals weer, widgets, lettertypen, mappen, AMOLED-achtergronden enz.
         \n\nHet is ook de beste manier om de ontwikkelaars van SidePhOnelauncher te steunen. Bekijk het eens!</string>
     <string name="wallpaper_message">SidePhOnelauncher biedt dagelijks mooie nieuwe achtergronden. Geef je startscherm iedere dag een frisse nieuwe look, gratis!

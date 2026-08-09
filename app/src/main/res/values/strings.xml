@@ -115,6 +115,11 @@
     <string name="swipe_down_for">Swipe down for</string>
     <string name="search">Search</string>
     <string name="notifications">Notifications</string>
+    <string name="notification_dots">Notification dots</string>
+    <string name="notification_dots_message">To show/hide notification dots on the home screen, please allow or disallow notification access for SidePhOnelauncher.
+        
+
+Note: No notification data is collected. Everything is processed on your device.</string>
     <string name="accessibility_disclosure">Please turn on SidePhOnelauncher\'s accessibility service in your device\'s settings to enable Double tap to lock gesture.
     \n\nPlease note that this service is only used for this particular feature. Our accessibility service does not collect or share any data.</string>
     <string name="accept">Accept</string>

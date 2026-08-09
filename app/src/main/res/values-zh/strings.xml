@@ -100,6 +100,9 @@
         \n\n请在手机设置中搜索数字健康并启用它。</string>
     <string name="app_usage_message">要在主屏幕上显示/隐藏您的屏幕时间，请允许或拒绝应用程序使用权限。
         \n\n注意：不收集应用程序使用数据。所有数据都在您的设备上处理。</string>
+    <string name="notification_dots">通知圆点</string>
+    <string name="notification_dots_message">要在主屏幕上显示/隐藏通知圆点，请允许或拒绝 SidePhOnelauncher 的通知访问权限。
+        \n\n注意：不会收集通知数据。所有处理都在您的设备上完成。</string>
     <string name="pro_message">SidePhOnelauncher 还有一个名为 Pro Launcher 的专业版。它具有额外的功能，如天气、部件、字体、文件夹、AMOLED 壁纸等。
         \n\n这也是支持 SidePhOnelauncher 开发者的最佳方式。快来看看吧！</string>
     <string name="wallpaper_message">SidePhOnelauncher每天提供美丽的新壁纸。让你的主屏幕每天焕然一新，免费！

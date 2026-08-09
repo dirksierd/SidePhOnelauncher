@@ -97,6 +97,9 @@
         \n\nWyszukaj opcję Cyfrowa równowaga w ustawieniach telefonu i włącz ją.</string>
     <string name="app_usage_message">Aby wyświetlić/ukryć czas ekranu na ekranie głównym, pozwól lub zabroń aplikacji na dostęp do danych o użyciu.
         \n\nUwaga: Nie są gromadzone żadne dane o użyciu aplikacji. Wszystko jest przetwarzane na Twoim urządzeniu.</string>
+    <string name="notification_dots">Kropki powiadomień</string>
+    <string name="notification_dots_message">Aby wyświetlać/ukrywać kropki powiadomień na ekranie głównym, zezwól lub zablokuj dostęp do powiadomień dla SidePhOnelauncher.
+        \n\nUwaga: Żadne dane z powiadomień nie są gromadzone. Wszystko jest przetwarzane na Twoim urządzeniu.</string>
     <string name="pro_message">SidePhOnelauncher ma również wersję pro o nazwie Pro Launcher. Posiada dodatkowe funkcje, takie jak pogoda, widgety, czcionki, foldery, tapety AMOLED itp.
         \n\nTo także najlepszy sposób na wsparcie deweloperów SidePhOnelauncher. Sprawdź to!</string>
     <string name="wallpaper_message">SidePhOnelauncher oferuje piękne nowe tapety codziennie. Nadaj swojemu ekranowi głównemu świeży wygląd każdego dnia, za darmo!

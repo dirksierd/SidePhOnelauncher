@@ -67,6 +67,9 @@
         \n\nKeresse meg a Digitális jólét elemet a telefon beállításai között, és engedélyezze.</string>
     <string name="app_usage_message">A képernyőidő megjelenítéséhez/elrejtéséhez a kezdőképernyőn engedélyezze vagy tagadja meg az alkalmazás használati engedélyét.
         \n\nMegjegyzés: Nem gyűjtünk alkalmazás-használati adatokat. Minden az Ön eszközén kerül feldolgozásra.</string>
+    <string name="notification_dots">Értesítési pontok</string>
+    <string name="notification_dots_message">Az értesítési pontok kezdőképernyőn való megjelenítéséhez/elrejtéséhez engedélyezze vagy tiltsa le a SidePhOnelauncher értesítés-hozzáférését.
+        \n\nMegjegyzés: Nem gyűjtünk értesítési adatokat. Minden az Ön eszközén kerül feldolgozásra.</string>
     <string name="pro_message">Az SidePhOnelauncher-nek van egy pro verziója is, amely Pro Launcher néven ismert. További funkciókat kínál, mint például időjárás, widgetek, betűtípusok, mappák, AMOLED háttérképek stb.
         \n\nEz a legjobb módja annak, hogy támogassa az SidePhOnelauncher fejlesztőit. Tekintse meg őket!</string>
     <string name="wallpaper_message">Az SidePhOnelauncher minden nap gyönyörű, új háttérképeket kínál, amelyekkel frissen tarthatja kezdőképernyőjét, ingyen!

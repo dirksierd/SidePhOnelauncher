@@ -65,6 +65,9 @@
         \n\nVänligen sök efter Digitalt välmående i dina telefoninställningar och aktivera den.</string>
     <string name="app_usage_message">För att visa/dölja din skärmtid på startsidan, vänligen tillåt eller neka appanvändningsbehörigheten.
         \n\nObs: Inga data om appanvändning samlas in. Allt bearbetas på din enhet.</string>
+    <string name="notification_dots">Notispunkter</string>
+    <string name="notification_dots_message">För att visa/dölja notispunkter på startsidan, vänligen tillåt eller neka aviseringsåtkomst för SidePhOnelauncher.
+        \n\nObs: Inga aviseringsdata samlas in. Allt bearbetas på din enhet.</string>
     <string name="pro_message">SidePhOnelauncher har också en pro-version som kallas Pro Launcher. Den har extra funktioner som väder, widgets, typsnitt, mappar, AMOLED-bakgrunder och så vidare.
         \n\nDet är också det bästa sättet att stödja utvecklarna av SidePhOnelauncher. Kolla in det!</string>
     <string name="wallpaper_message">SidePhOnelauncher erbjuder vackra nya bakgrundsbilder varje dag. Ge din hemskärm ett fräscht utseende varje dag, gratis!

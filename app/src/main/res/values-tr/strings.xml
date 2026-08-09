@@ -99,6 +99,9 @@
         \n\nLütfen telefon ayarlarınızda Dijital Denge\'yi arayın ve etkinleştirin.</string>
     <string name="app_usage_message">Ana ekranınızda ekran sürenizi göstermek/gizlemek için lütfen uygulama kullanım iznini onaylayın veya reddedin.
         \n\nNot: Uygulama kullanım verileri toplanmaz. Her şey cihazınızda işlenir.</string>
+    <string name="notification_dots">Bildirim noktaları</string>
+    <string name="notification_dots_message">Ana ekranda bildirim noktalarını göstermek/gizlemek için lütfen SidePhOnelauncher için bildirim erişimini onaylayın veya reddedin.
+        \n\nNot: Bildirim verileri toplanmaz. Her şey cihazınızda işlenir.</string>
     <string name="pro_message">SidePhOnelauncher\'ın Pro Launcher adında bir pro versiyonu da var. Hava durumu, widget\'lar, yazı tipleri, klasörler, AMOLED duvar kağıtları gibi ekstra özelliklere sahip.
         \n\nAyrıca SidePhOnelauncher geliştiricilerini desteklemenin en iyi yoludur. Mutlaka inceleyin!</string>
     <string name="wallpaper_message">SidePhOnelauncher, ana ekranınıza taze bir görünüm kazandırmak için her gün yeni duvar kağıtları sunuyor. Hem de ücretsiz!

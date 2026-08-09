@@ -268,6 +268,16 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
+                Constants.Dialog.NOTIFICATION_DOTS -> {
+                    showMessageDialog(R.string.notification_dots, R.string.notification_dots_message, R.string.permission) {
+                        try {
+                            startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                        } catch (_: Exception) {
+                            startActivity(Intent(Settings.ACTION_SETTINGS))
+                        }
+                    }
+                }
+
                 Constants.Dialog.PRO_MESSAGE -> {
                     showMessageDialog(R.string.hey, R.string.pro_message, R.string.sidephonelauncher_pro) {
                         openUrl(Constants.URL_PRO_LAUNCHER)

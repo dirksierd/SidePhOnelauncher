@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import android.view.WindowInsets
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -84,6 +85,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         populateTextSize()
         populateAlignment()
         populateStatusBar()
+        populateNotificationDots()
         populateDateTime()
         populateSwipeApps()
         populateSwipeDownAction()
@@ -95,6 +97,11 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
 
         if (showPentastic)
             binding.footer.text = getText(R.string.new_app_minimal_todo_lists)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        populateNotificationDots()
     }
 
     override fun onClick(view: View) {
@@ -130,6 +137,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
             R.id.alignmentRight -> viewModel.updateHomeAlignment(Gravity.END)
             R.id.alignmentBottom -> updateHomeBottomAlignment()
             R.id.statusBar -> toggleStatusBar()
+            R.id.notificationDotsRow -> viewModel.showDialog.postValue(Constants.Dialog.NOTIFICATION_DOTS)
             R.id.dateTime -> binding.dateTimeSelectLayout.visibility = View.VISIBLE
             R.id.dateTimeOn -> toggleDateTime(Constants.DateTime.ON)
             R.id.dateTimeOff -> toggleDateTime(Constants.DateTime.OFF)
@@ -230,6 +238,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         binding.alignmentRight.setOnClickListener(this)
         binding.alignmentBottom.setOnClickListener(this)
         binding.statusBar.setOnClickListener(this)
+        binding.notificationDotsRow.setOnClickListener(this)
         binding.dateTime.setOnClickListener(this)
         binding.dateTimeOn.setOnClickListener(this)
         binding.dateTimeOff.setOnClickListener(this)
@@ -330,6 +339,13 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
             hideStatusBar()
             binding.statusBar.text = getString(R.string.off)
         }
+    }
+
+    private fun populateNotificationDots() {
+        val enabledPackages = NotificationManagerCompat.getEnabledListenerPackages(requireContext())
+        binding.notificationDotsValue.text = getString(
+            if (enabledPackages.contains(requireContext().packageName)) R.string.on else R.string.off
+        )
     }
 
     private fun toggleDateTime(selected: Int) {

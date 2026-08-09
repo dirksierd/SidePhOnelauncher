@@ -65,6 +65,9 @@
         \n\nPotražite Digital Wellbeing u postavkama telefona i omogućite ga.</string>
     <string name="app_usage_message">Da biste prikazali/sakrili vrijeme korištenja ekrana na početnom zaslonu, molimo dozvolite ili onemogućite dopuštenje korištenja aplikacije.
         \n\nNapomena: Ne prikupljaju se podaci o korištenju aplikacije. Sve se obrađuje na vašem uređaju.</string>
+    <string name="notification_dots">Točke obavijesti</string>
+    <string name="notification_dots_message">Da biste prikazali/sakrili točke obavijesti na početnom zaslonu, molimo dopustite ili onemogućite pristup obavijestima za SidePhOnelauncher.
+        \n\nNapomena: Ne prikupljaju se podaci iz obavijesti. Sve se obrađuje na vašem uređaju.</string>
     <string name="pro_message">SidePhOnelauncher također ima pro verziju pod nazivom Pro Launcher. Ima dodatne značajke poput vremena, widgeta, fontova, mapa, AMOLED pozadina itd.
         \n\nTo je također najbolji način da podržite programere SidePhOnelauncher-a. Pogledajte!</string>
     <string name="wallpaper_message">SidePhOnelauncher nudi predivne nove pozadine svaki dan. Daj svom početnom ekranu svjež izgled svaki dan, besplatno!

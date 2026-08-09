@@ -65,6 +65,9 @@
         \n\nProcure Bem-estar Digital nas configurações do seu telefone e ative-o.</string>
     <string name="app_usage_message">Para exibir/ocultar o tempo de tela na tela inicial, permita ou negue a permissão de uso do aplicativo.
         \n\nNota: Não são coletados dados de uso do aplicativo. Tudo é processado no seu dispositivo.</string>
+    <string name="notification_dots">Pontos de notificação</string>
+    <string name="notification_dots_message">Para exibir/ocultar os pontos de notificação na tela inicial, permita ou negue o acesso às notificações para o SidePhOnelauncher.
+        \n\nNota: Nenhum dado de notificação é coletado. Tudo é processado no seu dispositivo.</string>
     <string name="pro_message">SidePhOnelauncher também tem uma versão pro chamada Pro Launcher. Tem recursos extras como clima, widgets, fontes, pastas, papéis de parede AMOLED, e assim por diante.
         \n\nÉ também a melhor maneira de apoiar os desenvolvedores do SidePhOnelauncher. Confira!</string>
     <string name="wallpaper_message">SidePhOnelauncher oferece lindos papéis de parede novos todos os dias. Dê uma nova aparência à sua tela inicial todos os dias, gratuitamente!

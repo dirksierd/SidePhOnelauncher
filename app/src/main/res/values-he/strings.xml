@@ -131,6 +131,8 @@
     <string name="home_screen">מסך הבית</string>
     <string name="digital_wellbeing_message">אם ברצונך להגדיר מגבלות זמן עבור אפליקציות מסוימות, תכונת Digital Wellbeing של אנדרואיד יכולה לעזור לך לעשות זאת. חפש את Digital Wellbeing בהגדרות הטלפון שלך והפעל אותה.</string>
     <string name="app_usage_message">כדי להציג/להסתיר את זמן המסך שלך במסך הבית, אנא אפשר או בטל את הרשאת השימוש באפליקציה. הערה: לא נאספים נתוני שימוש באפליקציה. הכל מעובד במכשיר שלך.</string>
+    <string name="notification_dots">נקודות התראה</string>
+    <string name="notification_dots_message">כדי להציג/להסתיר נקודות התראה במסך הבית, אנא אפשר או בטל את הגישה להתראות עבור SidePhOnelauncher. הערה: לא נאספים נתוני התראות. הכל מעובד במכשיר שלך.</string>
     <string name="pro_message">ל-SidePhOnelauncher יש גם גרסת Pro בשם Pro Launcher. יש לה תכונות נוספות כמו מזג אוויר, ווידג\'טים, גופנים, תיקיות, טפטים של AMOLED וכן הלאה. זוהי גם הדרך הטובה ביותר לתמוך במפתחי SidePhOnelauncher. תבדקו!</string>
     <string name="notification_bar">שורת ההתראות</string>
 </resources>

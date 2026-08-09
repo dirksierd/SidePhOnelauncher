@@ -65,6 +65,9 @@
         \n\nVeuillez rechercher Digital Wellbeing dans les paramètres de votre téléphone et l\'activer.</string>
     <string name="app_usage_message">Pour afficher/masquer le temps d\'écran sur l\'écran d\'accueil, autorisez ou refusez l\'autorisation d\'utilisation de l\'application.
         \n\nRemarque : Aucune donnée d\'utilisation de l\'application n\'est collectée. Tout est traité sur votre appareil.</string>
+    <string name="notification_dots">Points de notification</string>
+    <string name="notification_dots_message">Pour afficher/masquer les points de notification sur l\'écran d\'accueil, autorisez ou refusez l\'accès aux notifications pour SidePhOnelauncher.
+        \n\nRemarque : Aucune donnée de notification n\'est collectée. Tout est traité sur votre appareil.</string>
     <string name="pro_message">SidePhOnelauncher a également une version pro appelée Pro Launcher. Elle dispose de fonctionnalités supplémentaires telles que la météo, les widgets, les polices, les dossiers, les fonds d\'écran AMOLED, etc.
         \n\nC\'est aussi le meilleur moyen de soutenir les développeurs d\'SidePhOnelauncher. Jetez-y un œil !</string>
     <string name="wallpaper_message">SidePhOnelauncher propose de superbes fonds d\'écran nouveaux chaque jour. Donne un nouveau look à ton écran d\'accueil chaque jour, gratuitement!

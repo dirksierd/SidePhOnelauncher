@@ -1,4 +1,4 @@
-![Olauncher](https://repository-images.githubusercontent.com/278638069/db0acb80-661b-11eb-803e-926cae5dccb4)
+![SidePhOnelauncher](https://repository-images.githubusercontent.com/278638069/db0acb80-661b-11eb-803e-926cae5dccb4)
 
 # SidePhOnelauncher
 A keypad-friendly fork of **Olauncher**.
@@ -14,7 +14,7 @@ AF stands for Ad-Free
 
 - To maintain the simplicity of the launcher, a few niche features are available but hidden.
 
-- Please check out the **[About](https://tanujnotes.substack.com/p/olauncher-minimal-af-launcher?utm_source=github)** page in the Olauncher settings for a complete list of features and **FAQs**.
+- Please check out the **[About](https://github.com/dirksierd/SidePhOnelauncher#readme)** section in the SidePhOnelauncher settings for a complete list of features and **FAQs**.
 
 ##
 
@@ -26,7 +26,7 @@ Dev: [X/twitter](https://x.com/tanujnotes) • [Bluesky](https://bsky.app/profil
 
 ### My other apps:
 
-- [Pro Launcher](https://play.google.com/store/apps/details?id=app.prolauncher) - Pro version of Olauncher with extra features like widgets, weather, folders, etc.
+- [Pro Launcher](https://play.google.com/store/apps/details?id=app.prolauncher) - Pro version of the original OLauncher with extra features like widgets, weather, folders, etc.
 
 - [Note to Self](https://play.google.com/store/apps/details?id=com.makenotetoself) - Free and [open source](https://github.com/jeerovan/ntsapp) notes app with chat like interface and end-to-end encryption.
 

@@ -32,7 +32,7 @@ import app.sidephonelauncher.helper.isDarkThemeOn
 import app.sidephonelauncher.helper.isDaySince
 import app.sidephonelauncher.helper.isDefaultLauncher
 import app.sidephonelauncher.helper.isEinkDisplay
-import app.sidephonelauncher.helper.isOlauncherDefault
+import app.sidephonelauncher.helper.isSidePhOnelauncherDefault
 import app.sidephonelauncher.helper.isTablet
 import app.sidephonelauncher.helper.openUrl
 import app.sidephonelauncher.helper.rateApp
@@ -211,7 +211,7 @@ class MainActivity : AppCompatActivity() {
         viewModel.showDialog.observe(this) {
             when (it) {
                 Constants.Dialog.ABOUT -> {
-                    showMessageDialog(R.string.app_name, R.string.welcome_to_olauncher_settings, R.string.okay) {
+                    showMessageDialog(R.string.app_name, R.string.welcome_to_sidephonelauncher_settings, R.string.okay) {
                         binding.messageLayout.visibility = View.GONE
                     }
                 }
@@ -269,8 +269,8 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 Constants.Dialog.PRO_MESSAGE -> {
-                    showMessageDialog(R.string.hey, R.string.pro_message, R.string.olauncher_pro) {
-                        openUrl(Constants.URL_OLAUNCHER_PRO)
+                    showMessageDialog(R.string.hey, R.string.pro_message, R.string.sidephonelauncher_pro) {
+                        openUrl(Constants.URL_PRO_LAUNCHER)
                     }
                 }
             }
@@ -313,28 +313,28 @@ class MainActivity : AppCompatActivity() {
             Constants.UserState.WALLPAPER -> {
                 if (prefs.wallpaperMsgShown || prefs.dailyWallpaper)
                     prefs.userState = Constants.UserState.REVIEW
-                else if (isOlauncherDefault(this))
+                else if (isSidePhOnelauncherDefault(this))
                     viewModel.showDialog.postValue(Constants.Dialog.WALLPAPER)
             }
 
             Constants.UserState.REVIEW -> {
                 if (prefs.rateClicked)
                     prefs.userState = Constants.UserState.SHARE
-                else if (isOlauncherDefault(this) && prefs.firstOpenTime.hasBeenHours(1))
+                else if (isSidePhOnelauncherDefault(this) && prefs.firstOpenTime.hasBeenHours(1))
                     viewModel.showDialog.postValue(Constants.Dialog.REVIEW)
             }
 
             Constants.UserState.RATE -> {
                 if (prefs.rateClicked)
                     prefs.userState = Constants.UserState.SHARE
-                else if (isOlauncherDefault(this)
+                else if (isSidePhOnelauncherDefault(this)
                     && prefs.firstOpenTime.isDaySince() >= 7
                     && calendar.get(Calendar.HOUR_OF_DAY) >= 16
                 ) viewModel.showDialog.postValue(Constants.Dialog.RATE)
             }
 
             Constants.UserState.SHARE -> {
-                if (isOlauncherDefault(this) && prefs.firstOpenTime.hasBeenDays(14)
+                if (isSidePhOnelauncherDefault(this) && prefs.firstOpenTime.hasBeenDays(14)
                     && prefs.shareShownTime.isDaySince() >= 70
                     && calendar.get(Calendar.HOUR_OF_DAY) >= 16
                 ) viewModel.showDialog.postValue(Constants.Dialog.SHARE)

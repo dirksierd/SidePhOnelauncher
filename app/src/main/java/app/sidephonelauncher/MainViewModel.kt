@@ -27,7 +27,7 @@ import app.sidephonelauncher.helper.getAppsList
 import app.sidephonelauncher.helper.getPrivateSpaceApps
 import app.sidephonelauncher.helper.getPrivateSpaceUserHandle
 import app.sidephonelauncher.helper.hasBeenMinutes
-import app.sidephonelauncher.helper.isOlauncherDefault
+import app.sidephonelauncher.helper.isSidePhOnelauncherDefault
 import app.sidephonelauncher.helper.isPackageInstalled
 import app.sidephonelauncher.helper.isPrivateSpaceLocked
 import app.sidephonelauncher.helper.showToast
@@ -47,7 +47,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val updateSwipeApps = MutableLiveData<Any>()
     val appList = MutableLiveData<List<AppModel>?>()
     val hiddenApps = MutableLiveData<List<AppModel>?>()
-    val isOlauncherDefault = MutableLiveData<Boolean>()
+    val isSidePhOnelauncherDefault = MutableLiveData<Boolean>()
     val launcherResetFailed = MutableLiveData<Boolean>()
     val homeAppAlignment = MutableLiveData<Int>()
     val screenTimeValue = MutableLiveData<String>()
@@ -401,8 +401,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun isOlauncherDefault() {
-        isOlauncherDefault.value = isOlauncherDefault(appContext)
+    fun isSidePhOnelauncherDefault() {
+        isSidePhOnelauncherDefault.value = isSidePhOnelauncherDefault(appContext)
     }
 
     fun setWallpaperWorker() {

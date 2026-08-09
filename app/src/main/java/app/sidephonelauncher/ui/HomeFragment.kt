@@ -94,7 +94,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         NotificationDotRepository.addListener(notificationDotListener)
         dpadLeftKeyDownTime = 0L
         populateHomeScreen(false)
-        viewModel.isOlauncherDefault()
+        viewModel.isSidePhOnelauncherDefault()
         if (prefs.showStatusBar) showStatusBar()
         else hideStatusBar()
         requestInitialFocus()
@@ -173,7 +173,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             R.id.setDefaultLauncher -> {
                 prefs.hideSetDefaultLauncher = true
                 binding.setDefaultLauncher.visibility = View.GONE
-                if (viewModel.isOlauncherDefault.value != true) {
+                if (viewModel.isSidePhOnelauncherDefault.value != true) {
                     requireContext().showToast(R.string.set_as_default_launcher)
                     findNavController().navigate(R.id.action_mainFragment_to_settingsFragment)
                 }
@@ -191,7 +191,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         viewModel.refreshHome.observe(viewLifecycleOwner) {
             populateHomeScreen(it)
         }
-        viewModel.isOlauncherDefault.observe(viewLifecycleOwner, Observer {
+        viewModel.isSidePhOnelauncherDefault.observe(viewLifecycleOwner, Observer {
             if (it != true) {
                 if (prefs.dailyWallpaper && prefs.appTheme == AppCompatDelegate.MODE_NIGHT_YES) {
                     prefs.dailyWallpaper = false

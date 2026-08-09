@@ -33,7 +33,7 @@ import app.sidephonelauncher.helper.isAccessServiceEnabled
 import app.sidephonelauncher.helper.isDarkThemeOn
 import app.sidephonelauncher.helper.isEinkDisplay
 import app.sidephonelauncher.helper.isCountryIn
-import app.sidephonelauncher.helper.isOlauncherDefault
+import app.sidephonelauncher.helper.isSidePhOnelauncherDefault
 import app.sidephonelauncher.helper.isTablet
 import app.sidephonelauncher.helper.openAppInfo
 import app.sidephonelauncher.helper.openUrl
@@ -66,7 +66,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         viewModel = activity?.run {
             ViewModelProvider(this)[MainViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
-        viewModel.isOlauncherDefault()
+        viewModel.isSidePhOnelauncherDefault()
 
         deviceManager = requireContext().getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
         componentName = ComponentName(requireContext(), DeviceAdmin::class.java)
@@ -112,7 +112,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
             binding.alignmentSelectLayout.visibility = View.GONE
 
         when (view.id) {
-            R.id.olauncherHiddenApps -> showHiddenApps()
+            R.id.launcherHiddenApps -> showHiddenApps()
             R.id.moreFeatures -> viewModel.showDialog.postValue(Constants.Dialog.PRO_MESSAGE)
             R.id.screenTimeOnOff -> viewModel.showDialog.postValue(Constants.Dialog.DIGITAL_WELLBEING)
             R.id.appInfo -> openAppInfo(requireContext(), Process.myUserHandle(), BuildConfig.APPLICATION_ID)
@@ -164,9 +164,9 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
             R.id.notifications -> updateSwipeDownAction(Constants.SwipeDownAction.NOTIFICATIONS)
             R.id.search -> updateSwipeDownAction(Constants.SwipeDownAction.SEARCH)
 
-            R.id.aboutOlauncher -> {
+            R.id.aboutLauncher -> {
                 prefs.aboutClicked = true
-                requireContext().openUrl(Constants.URL_ABOUT_OLAUNCHER)
+                requireContext().openUrl(Constants.URL_ABOUT_PAGE)
             }
 
             R.id.share -> requireActivity().shareApp()
@@ -178,8 +178,8 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
             R.id.twitter -> requireContext().openUrl(
                 if (showInstagram) Constants.URL_INSTA_TANUJ else Constants.URL_TWITTER_TANUJ
             )
-            R.id.github -> requireContext().openUrl(Constants.URL_OLAUNCHER_GITHUB)
-            R.id.privacy -> requireContext().openUrl(Constants.URL_OLAUNCHER_PRIVACY)
+            R.id.github -> requireContext().openUrl(Constants.URL_GITHUB_REPO)
+            R.id.privacy -> requireContext().openUrl(Constants.URL_PRIVACY_POLICY)
             R.id.footer -> {
                 requireContext().openUrl(
                     if (showPentastic) Constants.URL_PENTASTIC else Constants.URL_NTS
@@ -210,11 +210,11 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
     }
 
     private fun initClickListeners() {
-        binding.olauncherHiddenApps.setOnClickListener(this)
+        binding.launcherHiddenApps.setOnClickListener(this)
         binding.scrollLayout.setOnClickListener(this)
         binding.appInfo.setOnClickListener(this)
         binding.setLauncher.setOnClickListener(this)
-        binding.aboutOlauncher.setOnClickListener(this)
+        binding.aboutLauncher.setOnClickListener(this)
         binding.moreFeatures.setOnClickListener(this)
         binding.autoShowKeyboard.setOnClickListener(this)
         binding.toggleLock.setOnClickListener(this)
@@ -281,7 +281,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
             viewModel.showDialog.postValue(Constants.Dialog.ABOUT)
             prefs.firstSettingsOpen = false
         }
-        viewModel.isOlauncherDefault.observe(viewLifecycleOwner) {
+        viewModel.isSidePhOnelauncherDefault.observe(viewLifecycleOwner) {
             if (it) {
                 binding.setLauncher.text = getString(R.string.change_default_launcher)
                 prefs.toShowHintCounter += 1
@@ -453,7 +453,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
     }
 
     private fun toggleDailyWallpaperUpdate() {
-        if (prefs.dailyWallpaper.not() && prefs.appTheme == AppCompatDelegate.MODE_NIGHT_YES && viewModel.isOlauncherDefault.value == false) {
+        if (prefs.dailyWallpaper.not() && prefs.appTheme == AppCompatDelegate.MODE_NIGHT_YES && viewModel.isSidePhOnelauncherDefault.value == false) {
             requireContext().showToast(R.string.set_as_default_launcher_first)
             return
         }
@@ -466,10 +466,10 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
     }
 
     private fun showWallpaperToasts() {
-        if (isOlauncherDefault(requireContext()))
+        if (isSidePhOnelauncherDefault(requireContext()))
             requireContext().showToast(getString(R.string.your_wallpaper_will_update_shortly))
         else
-            requireContext().showToast(getString(R.string.olauncher_is_not_default_launcher), Toast.LENGTH_LONG)
+            requireContext().showToast(getString(R.string.sidephonelauncher_is_not_default_launcher), Toast.LENGTH_LONG)
     }
 
     private fun updateHomeAppsNum(num: Int) {
@@ -573,8 +573,8 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
     }
 
     private fun updateHomeBottomAlignment() {
-        if (viewModel.isOlauncherDefault.value != true) {
-            requireContext().showToast(getString(R.string.please_set_olauncher_as_default_first), Toast.LENGTH_LONG)
+        if (viewModel.isSidePhOnelauncherDefault.value != true) {
+            requireContext().showToast(getString(R.string.please_set_sidephonelauncher_as_default_first), Toast.LENGTH_LONG)
             return
         }
         prefs.homeBottomAlignment = !prefs.homeBottomAlignment
@@ -670,8 +670,8 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
 
     private fun populateActionHints() {
         if (prefs.aboutClicked.not())
-            binding.aboutOlauncher.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_info, 0)
-        if (viewModel.isOlauncherDefault.value != true) return
+            binding.aboutLauncher.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_info, 0)
+        if (viewModel.isSidePhOnelauncherDefault.value != true) return
         if (prefs.rateClicked.not() && prefs.toShowHintCounter > Constants.HINT_RATE_US && prefs.toShowHintCounter < Constants.HINT_RATE_US + 100)
             binding.rate.setCompoundDrawablesWithIntrinsicBounds(0, android.R.drawable.arrow_down_float, 0, 0)
     }

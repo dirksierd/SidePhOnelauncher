@@ -1,17 +1,16 @@
 ![Olauncher](https://repository-images.githubusercontent.com/278638069/db0acb80-661b-11eb-803e-926cae5dccb4)
 
+# SidePhOnelauncher
+A keypad-friendly fork of **Olauncher**.
 
-# Olauncher | Minimal AF Launcher
+> [!IMPORTANT]
+> **SidePhOnelauncher** is a fork of [Olauncher](https://github.com/tanujnotes/Olauncher), co-authored with **Zed**, with two added features:
+> - **D-pad support** for navigating and launching apps
+> - **Subtle notification dots** on home screen app buttons
+
 AF stands for Ad-Free
 
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
-    alt="Get it on F-Droid"
-    height="80">](https://f-droid.org/packages/app.olauncher)
-[<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
-    alt="Get it on Play Store"
-    height="80">](https://play.google.com/store/apps/details?id=app.olauncher)
-
-### Install using [F-Droid](https://f-droid.org/packages/app.olauncher), [Play Store](https://play.google.com/store/apps/details?id=app.olauncher) or the [latest APK](https://github.com/tanujnotes/Olauncher/releases/).
+### Install using the [latest APK](https://github.com/dirksierd/SidePhOnelauncher/releases/).
 
 - To maintain the simplicity of the launcher, a few niche features are available but hidden.
 

@@ -28,7 +28,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "app.olauncher"
+        applicationId "app.sidephonelauncher"
         minSdkVersion 24
         targetSdkVersion 35
         versionCode ciVersionCode
@@ -69,7 +69,7 @@ android {
         viewBinding = true
         buildConfig = true
     }
-    namespace 'app.olauncher'
+    namespace 'app.sidephonelauncher'
 }
 
 dependencies {

@@ -1,6 +1,7 @@
 package app.olauncher.ui
 
 import android.content.Context
+import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.os.Process
@@ -113,7 +114,28 @@ class AppDrawerFragment : Fragment() {
             if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
             if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
                 focusFirstLaunchableItem()
-            } else false
+            } else {
+                false
+            }
+        }
+
+        searchTextView?.setOnKeyListener { _, keyCode, event ->
+            if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
+            when (keyCode) {
+                KeyEvent.KEYCODE_DPAD_DOWN -> focusFirstLaunchableItem()
+                KeyEvent.KEYCODE_DPAD_LEFT -> {
+                    val textView = searchTextView
+                    val selectionStart = textView?.selectionStart ?: -1
+                    val selectionEnd = textView?.selectionEnd ?: -1
+                    if (selectionStart <= 0 && selectionEnd <= 0) {
+                        findNavController().popBackStack()
+                        true
+                    } else {
+                        false
+                    }
+                }
+                else -> false
+            }
         }
     }
 
@@ -127,6 +149,7 @@ class AppDrawerFragment : Fragment() {
             searchTextView?.gravity = prefs.appLabelAlignment
             searchTextView?.inputType =
                 InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            searchTextView?.typeface = Typeface.DEFAULT
             searchTextView?.imeOptions =
                 EditorInfo.IME_ACTION_SEARCH or EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
         } catch (e: Exception) {

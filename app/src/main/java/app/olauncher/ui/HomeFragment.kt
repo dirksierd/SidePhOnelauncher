@@ -62,7 +62,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private val binding get() = _binding!!
 
     private var dpadLeftKeyDownTime = 0L
-    private var dpadRightKeyDownTime = 0L
     private val notificationDotListener: () -> Unit = {
         activity?.runOnUiThread {
             if (_binding != null) updateHomeNotificationDots()
@@ -94,7 +93,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         super.onResume()
         NotificationDotRepository.addListener(notificationDotListener)
         dpadLeftKeyDownTime = 0L
-        dpadRightKeyDownTime = 0L
         populateHomeScreen(false)
         viewModel.isOlauncherDefault()
         if (prefs.showStatusBar) showStatusBar()
@@ -245,8 +243,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                         if (event.repeatCount > 0) return true
                         if (focusedIndex < visibleApps.size - 1) {
                             visibleApps[focusedIndex + 1].requestFocus()
-                        } else if (focusedIndex == visibleApps.size - 1) {
-                            showAppList(Constants.FLAG_LAUNCH_APP)
                         }
                         return true
                     }
@@ -262,14 +258,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                         return true
                     }
                     KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                        if (dpadRightKeyDownTime == 0L) dpadRightKeyDownTime = System.currentTimeMillis()
-                        if (event.repeatCount > 0) {
-                            val elapsed = System.currentTimeMillis() - dpadRightKeyDownTime
-                            if (elapsed >= Constants.LONG_PRESS_DELAY_MS) {
-                                dpadRightKeyDownTime = 0L
-                                openSwipeRightApp()
-                            }
-                        }
+                        if (event.repeatCount > 0) return true
+                        showAppList(Constants.FLAG_LAUNCH_APP)
                         return true
                     }
                     KeyEvent.KEYCODE_DPAD_CENTER,
@@ -284,10 +274,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                         dpadLeftKeyDownTime = 0L
                         return true
                     }
-                    KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                        dpadRightKeyDownTime = 0L
-                        return true
-                    }
+                    KeyEvent.KEYCODE_DPAD_RIGHT -> return true
                     KeyEvent.KEYCODE_DPAD_CENTER,
                     KeyEvent.KEYCODE_ENTER,
                     KeyEvent.KEYCODE_NUMPAD_ENTER -> return false
@@ -361,9 +348,13 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                         if (focusedIndex < 0) return@setOnKeyListener true
                         if (focusedIndex < visibleApps.size - 1) {
                             visibleApps[focusedIndex + 1].requestFocus()
-                        } else {
-                            showAppList(Constants.FLAG_LAUNCH_APP)
                         }
+                        true
+                    }
+                    KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                        if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener true
+                        if (event.repeatCount > 0) return@setOnKeyListener true
+                        showAppList(Constants.FLAG_LAUNCH_APP)
                         true
                     }
                     KeyEvent.KEYCODE_ENTER,

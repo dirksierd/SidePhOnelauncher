@@ -216,6 +216,13 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     private fun initKeyNavigation() {
         binding.mainLayout.isFocusable = true
+        binding.mainLayout.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                binding.mainLayout.post {
+                    redirectRootFocusToHomeApp()
+                }
+            }
+        }
         binding.mainLayout.setOnKeyListener { _, keyCode, event ->
             handleHomeKeyEvent(keyCode, event)
         }
@@ -224,6 +231,28 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private fun handleHomeKeyEvent(keyCode: Int, event: KeyEvent): Boolean {
         val visibleApps = getVisibleHomeApps()
         if (visibleApps.isEmpty()) return false
+
+        if (activity?.currentFocus == binding.mainLayout) {
+            when (keyCode) {
+                KeyEvent.KEYCODE_DPAD_UP,
+                KeyEvent.KEYCODE_DPAD_DOWN,
+                KeyEvent.KEYCODE_DPAD_LEFT,
+                KeyEvent.KEYCODE_DPAD_CENTER,
+                KeyEvent.KEYCODE_ENTER,
+                KeyEvent.KEYCODE_NUMPAD_ENTER -> {
+                    if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
+                        redirectRootFocusToHomeApp()
+                    }
+                    return true
+                }
+                KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                    if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
+                        showAppList(Constants.FLAG_LAUNCH_APP)
+                    }
+                    return true
+                }
+            }
+        }
 
         val focusedIndex = visibleApps.indexOf(activity?.currentFocus)
 
@@ -286,6 +315,10 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     private fun requestInitialFocus() {
         if (binding.mainLayout.isInTouchMode) return
+        redirectRootFocusToHomeApp()
+    }
+
+    private fun redirectRootFocusToHomeApp() {
         getVisibleHomeApps().firstOrNull()?.requestFocus()
     }
 

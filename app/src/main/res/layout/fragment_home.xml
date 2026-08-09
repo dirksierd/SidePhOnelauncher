@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
+    android:defaultFocusHighlightEnabled="false"
     android:orientation="vertical"
     tools:context=".ui.HomeFragment">
 
@@ -12,6 +13,8 @@
         android:id="@+id/lock"
         android:layout_width="match_parent"
         android:layout_height="1dp"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         android:contentDescription="@string/lock_layout_description" />
 
     <LinearLayout

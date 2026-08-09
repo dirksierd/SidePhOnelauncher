@@ -134,10 +134,13 @@ class AppDrawerAdapter(
                 isBangSearch = charSearch?.startsWith("!") ?: false
                 autoLaunch = allowAutoLaunch && (charSearch?.startsWith(" ")?.not() ?: true)
 
-                val appFilteredList = (if (charSearch.isNullOrBlank()) appsList
-                else appsList.filter { app ->
-                    app !is AppModel.PrivateSpaceHeader && appLabelMatches(app.appLabel, charSearch)
-                } as MutableList<AppModel>)
+                val appFilteredList = if (charSearch.isNullOrBlank()) {
+                    appsList.toMutableList()
+                } else {
+                    appsList.filter { app ->
+                        app !is AppModel.PrivateSpaceHeader && appLabelMatches(app.appLabel, charSearch)
+                    }.toMutableList()
+                }
 
                 val filterResults = FilterResults()
                 filterResults.values = appFilteredList
@@ -165,6 +168,7 @@ class AppDrawerAdapter(
                 && flag == Constants.FLAG_LAUNCH_APP
                 && appFilteredList.isNotEmpty()
                 && appFilteredList[0] !is AppModel.PrivateSpaceHeader
+                && appFilteredList[0].appPackage.isNotBlank()
             ) appClickListener(appFilteredList[0])
         } catch (e: Exception) {
             e.printStackTrace()
@@ -198,8 +202,14 @@ class AppDrawerAdapter(
         submitList(appsList)
     }
 
+    fun hasLaunchableResults(): Boolean {
+        return appFilteredList.any { it !is AppModel.PrivateSpaceHeader && it.appPackage.isNotBlank() }
+    }
+
     fun launchFirstInList() {
-        val first = appFilteredList.firstOrNull { it !is AppModel.PrivateSpaceHeader }
+        val first = appFilteredList.firstOrNull {
+            it !is AppModel.PrivateSpaceHeader && it.appPackage.isNotBlank()
+        }
         if (first != null) appClickListener(first)
     }
 

@@ -45,7 +45,7 @@ class AppDrawerFragment : Fragment() {
     private lateinit var prefs: Prefs
     private lateinit var adapter: AppDrawerAdapter
     private lateinit var linearLayoutManager: LinearLayoutManager
-    private var searchTextView: TextView? = null
+    private var searchTextView: SearchView.SearchAutoComplete? = null
     private var cachedIsCjkKeyboard: Boolean? = null
 
     private var flag = Constants.FLAG_LAUNCH_APP
@@ -112,31 +112,32 @@ class AppDrawerFragment : Fragment() {
 
         binding.search.setOnKeyListener { _, keyCode, event ->
             if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
-            if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
-                focusFirstLaunchableItem()
-            } else {
-                false
+            when (keyCode) {
+                KeyEvent.KEYCODE_DPAD_DOWN -> {
+                    focusFirstLaunchableItem()
+                    true
+                }
+                KeyEvent.KEYCODE_DPAD_LEFT -> handleSearchLeftKey()
+                else -> false
             }
         }
 
         searchTextView?.setOnKeyListener { _, keyCode, event ->
             if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
             when (keyCode) {
-                KeyEvent.KEYCODE_DPAD_DOWN -> focusFirstLaunchableItem()
-                KeyEvent.KEYCODE_DPAD_LEFT -> {
-                    val textView = searchTextView
-                    val selectionStart = textView?.selectionStart ?: -1
-                    val selectionEnd = textView?.selectionEnd ?: -1
-                    if (selectionStart <= 0 && selectionEnd <= 0) {
-                        findNavController().popBackStack()
-                        true
-                    } else {
-                        false
-                    }
+                KeyEvent.KEYCODE_DPAD_DOWN -> {
+                    focusFirstLaunchableItem()
+                    true
                 }
+                KeyEvent.KEYCODE_DPAD_LEFT -> handleSearchLeftKey()
                 else -> false
             }
         }
+    }
+
+    private fun handleSearchLeftKey(): Boolean {
+        findNavController().popBackStack()
+        return true
     }
 
     private fun initViews() {
@@ -162,7 +163,7 @@ class AppDrawerFragment : Fragment() {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (query?.startsWith("!") == true)
                     requireContext().openUrl(Constants.URL_DUCK_SEARCH + query.replace(" ", "%20"))
-                else if (adapter.itemCount == 0)
+                else if (!adapter.hasLaunchableResults())
                     requireContext().openSearch(query?.trim())
                 else
                     adapter.launchFirstInList()
@@ -442,10 +443,29 @@ class AppDrawerFragment : Fragment() {
             viewModel.checkForMessages.call()
     }
 
+    private fun requestInitialSearchFocus() {
+        binding.search.post {
+            binding.search.isIconified = false
+            binding.search.requestFocus()
+            searchTextView?.apply {
+                isFocusable = true
+                isFocusableInTouchMode = true
+                requestFocus()
+                setSelection(text?.length ?: 0)
+            }
+        }
+    }
+
     override fun onStart() {
         super.onStart()
         cachedIsCjkKeyboard = null
+        requestInitialSearchFocus()
         binding.search.showKeyboard(prefs.autoShowKeyboard)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        requestInitialSearchFocus()
     }
 
     override fun onStop() {

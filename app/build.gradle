@@ -1,6 +1,20 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
+def releaseKeystorePath = System.getenv("ANDROID_KEYSTORE_PATH") ?: (project.hasProperty("ANDROID_KEYSTORE_PATH") ? project.property("ANDROID_KEYSTORE_PATH") : null)
+def releaseStorePassword = System.getenv("ANDROID_STORE_PASSWORD") ?: (project.hasProperty("ANDROID_STORE_PASSWORD") ? project.property("ANDROID_STORE_PASSWORD") : null)
+def releaseKeyAlias = System.getenv("ANDROID_KEY_ALIAS") ?: (project.hasProperty("ANDROID_KEY_ALIAS") ? project.property("ANDROID_KEY_ALIAS") : null)
+def releaseKeyPassword = System.getenv("ANDROID_KEY_PASSWORD") ?: (project.hasProperty("ANDROID_KEY_PASSWORD") ? project.property("ANDROID_KEY_PASSWORD") : null)
+def ciRunNumberRaw = System.getenv("GITHUB_RUN_NUMBER") ?: (project.hasProperty("GITHUB_RUN_NUMBER") ? project.property("GITHUB_RUN_NUMBER") : null)
+def ciRunNumber = ciRunNumberRaw?.isInteger() ? ciRunNumberRaw.toInteger() : null
+
+def baseVersionCode = 109
+def baseVersionName = "v6.7.1"
+def ciVersionCode = ciRunNumber != null ? (baseVersionCode * 100000 + ciRunNumber) : baseVersionCode
+def ciVersionName = ciRunNumber != null ? "${baseVersionName}+${ciRunNumber}" : baseVersionName
+
+def hasReleaseSigning = releaseKeystorePath && releaseStorePassword && releaseKeyAlias && releaseKeyPassword
+
 android {
     compileSdk 35
 
@@ -17,17 +31,31 @@ android {
         applicationId "app.olauncher"
         minSdkVersion 24
         targetSdkVersion 35
-        versionCode 109
-        versionName "v6.7.1"
+        versionCode ciVersionCode
+        versionName ciVersionName
 
         resourceConfigurations += ["en", "ar", "de", "es-rES", "es-rUS", "fr", "he", "hr", "hu", "in", "it", "ja", "nl", "pl", "pt-rBR", "ru-rRU", "sv", "tr", "uk", "zh"]
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    if (hasReleaseSigning) {
+        signingConfigs {
+            release {
+                storeFile file(releaseKeystorePath)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
     }
 
     buildTypes {
         release {
             debuggable false
             minifyEnabled true
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {

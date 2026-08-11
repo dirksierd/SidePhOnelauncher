@@ -19,6 +19,8 @@ import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.RequiresApi
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import app.sidephonelauncher.BuildConfig
 import app.sidephonelauncher.R
 import app.sidephonelauncher.data.Constants
@@ -26,9 +28,11 @@ import java.util.Calendar
 import java.util.Locale
 
 fun View.hideKeyboard() {
-    this.clearFocus()
+    clearFocus()
+    ViewCompat.getWindowInsetsController(this)?.hide(WindowInsetsCompat.Type.ime())
     val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.hideSoftInputFromWindow(windowToken, 0)
+    post { rootView?.requestApplyInsets() }
 }
 
 fun View.showKeyboard(show: Boolean = true) {

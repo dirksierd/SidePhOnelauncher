@@ -376,10 +376,17 @@ class AppDrawerFragment : Fragment() {
         }.takeIf { it >= 0 } ?: RecyclerView.NO_POSITION
     }
 
+    private fun dismissSearchInput() {
+        (searchTextView ?: binding.search).hideKeyboard()
+        searchTextView?.clearFocus()
+        binding.search.clearFocus()
+    }
+
     private fun focusFirstLaunchableItem(): Boolean {
         val position = findFirstLaunchablePosition()
         if (position == RecyclerView.NO_POSITION) return false
 
+        dismissSearchInput()
         binding.recyclerView.requestFocus()
         binding.recyclerView.scrollToPosition(position)
         binding.recyclerView.post {

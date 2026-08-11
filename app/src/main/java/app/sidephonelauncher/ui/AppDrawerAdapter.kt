@@ -20,6 +20,7 @@ import app.sidephonelauncher.R
 import app.sidephonelauncher.data.AppModel
 import app.sidephonelauncher.data.Constants
 import app.sidephonelauncher.databinding.AdapterAppDrawerBinding
+import app.sidephonelauncher.databinding.AdapterAppDrawerSpacerBinding
 import app.sidephonelauncher.databinding.AdapterPrivateSpaceHeaderBinding
 import app.sidephonelauncher.helper.hideKeyboard
 import app.sidephonelauncher.helper.isSystemApp
@@ -34,6 +35,7 @@ class AppDrawerAdapter(
     private val appDeleteListener: (AppModel) -> Unit,
     private val appHideListener: (AppModel, Int) -> Unit,
     private val appRenameListener: (AppModel, String) -> Unit,
+    private val appLeftListener: () -> Boolean = { false },
     private val privateSpaceToggleListener: () -> Unit = {},
     private val privateSpaceSettingsListener: () -> Unit = {},
 ) : ListAdapter<AppModel, RecyclerView.ViewHolder>(DIFF_CALLBACK), Filterable {
@@ -41,6 +43,7 @@ class AppDrawerAdapter(
     companion object {
         const val VIEW_TYPE_APP = 0
         const val VIEW_TYPE_PRIVATE_HEADER = 1
+        const val VIEW_TYPE_SPACER = 2
 
         val DIFF_CALLBACK = object : DiffUtil.ItemCallback<AppModel>() {
             override fun areItemsTheSame(oldItem: AppModel, newItem: AppModel): Boolean = when {
@@ -51,6 +54,7 @@ class AppDrawerAdapter(
                     oldItem.shortcutId == newItem.shortcutId && oldItem.user == newItem.user
 
                 oldItem is AppModel.PrivateSpaceHeader && newItem is AppModel.PrivateSpaceHeader -> true
+                oldItem is AppModel.Spacer && newItem is AppModel.Spacer -> true
 
                 else -> false
             }
@@ -74,6 +78,7 @@ class AppDrawerAdapter(
     override fun getItemViewType(position: Int): Int {
         return when (appFilteredList.getOrNull(position)) {
             is AppModel.PrivateSpaceHeader -> VIEW_TYPE_PRIVATE_HEADER
+            is AppModel.Spacer -> VIEW_TYPE_SPACER
             else -> VIEW_TYPE_APP
         }
     }
@@ -82,6 +87,13 @@ class AppDrawerAdapter(
         return when (viewType) {
             VIEW_TYPE_PRIVATE_HEADER -> PrivateSpaceHeaderViewHolder(
                 AdapterPrivateSpaceHeaderBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+            )
+            VIEW_TYPE_SPACER -> SpacerViewHolder(
+                AdapterAppDrawerSpacerBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false
@@ -118,8 +130,10 @@ class AppDrawerAdapter(
                     appDeleteListener,
                     appInfoListener,
                     appHideListener,
-                    appRenameListener
+                    appRenameListener,
+                    appLeftListener,
                 )
+                is SpacerViewHolder -> Unit
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -138,9 +152,11 @@ class AppDrawerAdapter(
                     appsList.toMutableList()
                 } else {
                     appsList.filter { app ->
-                        app !is AppModel.PrivateSpaceHeader && appLabelMatches(app.appLabel, charSearch)
+                        app !is AppModel.PrivateSpaceHeader
+                            && app !is AppModel.Spacer
+                            && appLabelMatches(app.appLabel, charSearch)
                     }.toMutableList()
-                }
+                }.appendSpacerItem()
 
                 val filterResults = FilterResults()
                 filterResults.values = appFilteredList
@@ -187,19 +203,10 @@ class AppDrawerAdapter(
             .replace(separatorsRegex, "")
 
     fun setAppList(appsList: MutableList<AppModel>) {
-        appsList.add(
-            AppModel.App(
-                appLabel = "",
-                key = null,
-                appPackage = "",
-                activityClassName = "",
-                isNew = false,
-                user = android.os.Process.myUserHandle()
-            )
-        )
-        this.appsList = appsList
-        this.appFilteredList = appsList
-        submitList(appsList)
+        val listWithSpacer = appsList.toMutableList().appendSpacerItem()
+        this.appsList = listWithSpacer
+        this.appFilteredList = listWithSpacer
+        submitList(listWithSpacer)
     }
 
     fun hasLaunchableResults(): Boolean {
@@ -211,6 +218,12 @@ class AppDrawerAdapter(
             it !is AppModel.PrivateSpaceHeader && it.appPackage.isNotBlank()
         }
         if (first != null) appClickListener(first)
+    }
+
+    private fun MutableList<AppModel>.appendSpacerItem(): MutableList<AppModel> {
+        removeAll { it is AppModel.Spacer }
+        add(AppModel.Spacer())
+        return this
     }
 
     class PrivateSpaceHeaderViewHolder(private val binding: AdapterPrivateSpaceHeaderBinding) :
@@ -229,6 +242,9 @@ class AppDrawerAdapter(
         }
     }
 
+    class SpacerViewHolder(binding: AdapterAppDrawerSpacerBinding) :
+        RecyclerView.ViewHolder(binding.root)
+
     class ViewHolder(private val binding: AdapterAppDrawerBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(
@@ -241,6 +257,7 @@ class AppDrawerAdapter(
             appInfoListener: (AppModel) -> Unit,
             appHideListener: (AppModel, Int) -> Unit,
             appRenameListener: (AppModel, String) -> Unit,
+            appLeftListener: () -> Boolean,
         ) = with(binding) {
             appHideLayout.visibility = View.GONE
             renameLayout.visibility = View.GONE
@@ -294,6 +311,9 @@ class AppDrawerAdapter(
                             }
                             else -> false
                         }
+                    }
+                    KeyEvent.KEYCODE_DPAD_LEFT -> {
+                        if (event.action == KeyEvent.ACTION_DOWN) appLeftListener() else false
                     }
                     else -> false
                 }

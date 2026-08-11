@@ -66,7 +66,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     // val showRecentApps = SingleLiveEvent<Unit?>()
 
     fun selectedApp(appModel: AppModel, flag: Int) {
-        if (appModel is AppModel.PrivateSpaceHeader) return
+        if (appModel is AppModel.PrivateSpaceHeader || appModel is AppModel.Spacer) return
         when (flag) {
             Constants.FLAG_LAUNCH_APP -> {
                 when (appModel) {
@@ -114,7 +114,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun saveHomeApp(appModel: AppModel, position: Int) {
         when (appModel) {
-            is AppModel.PrivateSpaceHeader -> return
+            is AppModel.PrivateSpaceHeader, is AppModel.Spacer -> return
             is AppModel.App -> {
                 when (position) {
                     1 -> {
@@ -272,7 +272,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun saveSwipeApp(appModel: AppModel, isLeft: Boolean) {
         when (appModel) {
-            is AppModel.PrivateSpaceHeader -> return
+            is AppModel.PrivateSpaceHeader, is AppModel.Spacer -> return
             is AppModel.App -> {
                 if (isLeft) {
                     prefs.appNameSwipeLeft = appModel.appLabel

@@ -233,7 +233,7 @@ class AppDrawerFragment : Fragment() {
             },
             appDeleteListener = { appModel ->
                 when (appModel) {
-                    is AppModel.PrivateSpaceHeader -> {}
+                    is AppModel.PrivateSpaceHeader, is AppModel.Spacer -> {}
                     is AppModel.PinnedShortcut ->
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
                             requireContext().deletePinnedShortcut(
@@ -293,6 +293,7 @@ class AppDrawerFragment : Fragment() {
                 prefs.setAppRenameLabel(identifier, renameLabel)
                 viewModel.getAppList()
             },
+            appLeftListener = ::handleSearchLeftKey,
             privateSpaceToggleListener = {
                 viewModel.togglePrivateSpaceLock()
             },

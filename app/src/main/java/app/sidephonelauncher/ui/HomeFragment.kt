@@ -64,7 +64,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private var dpadLeftKeyDownTime = 0L
     private val notificationDotListener: () -> Unit = {
         activity?.runOnUiThread {
-            if (_binding != null) updateHomeNotificationDots()
+            updateHomeNotificationDotsSafely()
         }
     }
 
@@ -219,7 +219,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         binding.mainLayout.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 binding.mainLayout.post {
-                    redirectRootFocusToHomeApp()
+                    redirectRootFocusToHomeAppSafely()
                 }
             }
         }
@@ -241,7 +241,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 KeyEvent.KEYCODE_ENTER,
                 KeyEvent.KEYCODE_NUMPAD_ENTER -> {
                     if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
-                        redirectRootFocusToHomeApp()
+                        redirectRootFocusToHomeAppSafely()
                     }
                     return true
                 }
@@ -315,11 +315,21 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     private fun requestInitialFocus() {
         if (binding.mainLayout.isInTouchMode) return
-        redirectRootFocusToHomeApp()
+        redirectRootFocusToHomeAppSafely()
     }
 
-    private fun redirectRootFocusToHomeApp() {
-        getVisibleHomeApps().firstOrNull()?.requestFocus()
+    private fun redirectRootFocusToHomeAppSafely() {
+        val binding = _binding ?: return
+        listOf(
+            binding.homeApp1,
+            binding.homeApp2,
+            binding.homeApp3,
+            binding.homeApp4,
+            binding.homeApp5,
+            binding.homeApp6,
+            binding.homeApp7,
+            binding.homeApp8,
+        ).firstOrNull { it.visibility == View.VISIBLE }?.requestFocus()
     }
 
     private fun getVisibleHomeApps(): List<View> {
@@ -576,7 +586,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         return false
     }
 
-    private fun updateHomeNotificationDots() {
+    private fun updateHomeNotificationDotsSafely() {
+        val binding = _binding ?: return
         updateHomeAppDot(binding.homeApp1 as TextView, prefs.appPackage1)
         updateHomeAppDot(binding.homeApp2 as TextView, prefs.appPackage2)
         updateHomeAppDot(binding.homeApp3 as TextView, prefs.appPackage3)

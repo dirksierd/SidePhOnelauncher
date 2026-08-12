@@ -254,6 +254,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     fun shouldHandleUnfocusedDpadKeyEvent(): Boolean {
+        val binding = _binding ?: return false
         val focusedView = activity?.currentFocus
         return focusedView == null
                 || focusedView == binding.mainLayout
@@ -292,6 +293,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun handleHomeKeyEvent(keyCode: Int, event: KeyEvent): Boolean {
+        val binding = _binding ?: return false
         val visibleApps = getVisibleHomeApps()
 
         if (activity?.currentFocus == binding.mainLayout) {
@@ -385,6 +387,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     fun ensureHomeFocus(): Boolean {
+        if (_binding == null) return false
         val target = getPreferredHomeFocusTarget() ?: return false
         val focusedView = activity?.currentFocus
         if (focusedView == target && target.hasFocus()) return true
@@ -424,6 +427,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun getPreferredHomeFocusTarget(): View? {
+        val binding = _binding ?: return null
         val firstVisibleHomeApp = getVisibleHomeApps().firstOrNull()
         if (viewModel.consumeResetHomeFocusToFirstApp()) {
             return firstVisibleHomeApp ?: getTopHomeHeaderTargets().firstOrNull()
@@ -443,6 +447,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun getTopHomeHeaderTargets(): List<View> {
+        val binding = _binding ?: return emptyList()
         return buildList {
             if (binding.clock.isVisible) add(binding.clock)
             if (binding.date.isVisible) add(binding.date)
@@ -454,6 +459,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun getVisibleHomeApps(): List<View> {
+        val binding = _binding ?: return emptyList()
         return listOf(
             binding.homeApp1,
             binding.homeApp2,

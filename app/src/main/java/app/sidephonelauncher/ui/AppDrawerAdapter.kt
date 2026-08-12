@@ -41,6 +41,7 @@ class AppDrawerAdapter(
     private val appRenameListener: (AppModel, String) -> Unit,
     private val appLeftListener: () -> Boolean = { false },
     private val appBackListener: () -> Boolean = { false },
+    private val appVerticalFocusListener: (Int, Int) -> Boolean = { _, _ -> false },
     private val privateSpaceToggleListener: () -> Unit = {},
     private val privateSpaceSettingsListener: () -> Unit = {},
 ) : ListAdapter<AppModel, RecyclerView.ViewHolder>(DIFF_CALLBACK), Filterable {
@@ -142,6 +143,7 @@ class AppDrawerAdapter(
                     appRenameListener,
                     appLeftListener,
                     appBackListener,
+                    appVerticalFocusListener,
                 )
 
                 is SpacerViewHolder -> Unit
@@ -275,6 +277,7 @@ class AppDrawerAdapter(
             appRenameListener: (AppModel, String) -> Unit,
             appLeftListener: () -> Boolean,
             appBackListener: () -> Boolean,
+            appVerticalFocusListener: (Int, Int) -> Boolean,
         ) = with(binding) {
             appHideLayout.visibility = View.GONE
             renameLayout.visibility = View.GONE
@@ -349,6 +352,17 @@ class AppDrawerAdapter(
 
                     KeyEvent.KEYCODE_DPAD_LEFT -> {
                         if (event.action == KeyEvent.ACTION_DOWN) appLeftListener() else false
+                    }
+
+                    KeyEvent.KEYCODE_DPAD_UP,
+                    KeyEvent.KEYCODE_DPAD_DOWN -> {
+                        if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener true
+                        val direction = if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) 1 else -1
+                        val position = bindingAdapterPosition
+                        if (position == RecyclerView.NO_POSITION) true else appVerticalFocusListener(
+                            position,
+                            direction
+                        )
                     }
 
                     KeyEvent.KEYCODE_BACK -> {

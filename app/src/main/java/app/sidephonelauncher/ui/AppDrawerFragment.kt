@@ -361,6 +361,7 @@ class AppDrawerFragment : Fragment() {
                 focusSearchInput()
                 true
             },
+            appVerticalFocusListener = ::moveFocusFromPosition,
             privateSpaceToggleListener = {
                 viewModel.togglePrivateSpaceLock()
             },
@@ -470,13 +471,47 @@ class AppDrawerFragment : Fragment() {
 
         dismissSearchInput()
         binding.recyclerView.requestFocus()
+        focusRecyclerItem(position)
+        return true
+    }
+
+    private fun moveFocusFromPosition(currentPosition: Int, direction: Int): Boolean {
+        val targetPosition = findNextFocusablePosition(currentPosition, direction)
+        if (targetPosition == RecyclerView.NO_POSITION) {
+            if (direction < 0) {
+                focusSearchInput()
+            }
+            return true
+        }
+
+        binding.recyclerView.requestFocus()
+        focusRecyclerItem(targetPosition)
+        return true
+    }
+
+    private fun findNextFocusablePosition(currentPosition: Int, direction: Int): Int {
+        var targetPosition = currentPosition + direction
+        while (targetPosition in 0 until adapter.itemCount) {
+            val appModel = adapter.appFilteredList.getOrNull(targetPosition)
+            if (appModel != null
+                && appModel !is AppModel.PrivateSpaceHeader
+                && appModel !is AppModel.Spacer
+                && appModel.appPackage.isNotBlank()
+            ) {
+                return targetPosition
+            }
+            targetPosition += direction
+        }
+        return RecyclerView.NO_POSITION
+    }
+
+    private fun focusRecyclerItem(position: Int) {
         binding.recyclerView.scrollToPosition(position)
         binding.recyclerView.post {
             val holder = binding.recyclerView.findViewHolderForAdapterPosition(position)
             val itemView = holder?.itemView?.findViewById<View>(R.id.appRow) ?: holder?.itemView
             itemView?.requestFocus()
         }
-        return true
     }
 
     private fun initClickListeners() {

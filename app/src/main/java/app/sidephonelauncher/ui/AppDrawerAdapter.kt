@@ -178,14 +178,18 @@ class AppDrawerAdapter(
 
     private fun autoLaunch() {
         try {
-            if (itemCount == 1
+            val launchableResults = appFilteredList.filter {
+                it !is AppModel.PrivateSpaceHeader
+                    && it !is AppModel.Spacer
+                    && it.appPackage.isNotBlank()
+            }
+            if (launchableResults.size == 1
                 && autoLaunch
                 && isBangSearch.not()
                 && flag == Constants.FLAG_LAUNCH_APP
-                && appFilteredList.isNotEmpty()
-                && appFilteredList[0] !is AppModel.PrivateSpaceHeader
-                && appFilteredList[0].appPackage.isNotBlank()
-            ) appClickListener(appFilteredList[0])
+            ) {
+                appClickListener(launchableResults[0])
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }

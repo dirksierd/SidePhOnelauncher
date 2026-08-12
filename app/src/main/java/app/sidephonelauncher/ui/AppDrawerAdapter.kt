@@ -2,6 +2,8 @@ package app.sidephonelauncher.ui
 
 import android.content.Context
 import android.content.pm.LauncherApps
+import android.content.res.ColorStateList
+import android.graphics.Paint
 import android.os.UserHandle
 import android.text.Editable
 import android.text.TextWatcher
@@ -22,6 +24,7 @@ import app.sidephonelauncher.data.Constants
 import app.sidephonelauncher.databinding.AdapterAppDrawerBinding
 import app.sidephonelauncher.databinding.AdapterAppDrawerSpacerBinding
 import app.sidephonelauncher.databinding.AdapterPrivateSpaceHeaderBinding
+import app.sidephonelauncher.helper.getColorFromAttr
 import app.sidephonelauncher.helper.hideKeyboard
 import app.sidephonelauncher.helper.isSystemApp
 import app.sidephonelauncher.helper.showKeyboard
@@ -30,6 +33,7 @@ import java.text.Normalizer
 class AppDrawerAdapter(
     private var flag: Int,
     private val appLabelGravity: Int,
+    private val focusIndicatorStyle: Int,
     private val appClickListener: (AppModel) -> Unit,
     private val appInfoListener: (AppModel) -> Unit,
     private val appDeleteListener: (AppModel) -> Unit,
@@ -128,6 +132,7 @@ class AppDrawerAdapter(
                 is ViewHolder -> holder.bind(
                     flag,
                     appLabelGravity,
+                    focusIndicatorStyle,
                     myUserHandle,
                     appModel,
                     appClickListener,
@@ -260,6 +265,7 @@ class AppDrawerAdapter(
         fun bind(
             flag: Int,
             appLabelGravity: Int,
+            focusIndicatorStyle: Int,
             myUserHandle: UserHandle,
             appModel: AppModel,
             clickListener: (AppModel) -> Unit,
@@ -283,12 +289,14 @@ class AppDrawerAdapter(
             appTitle.gravity = appLabelGravity
             otherProfileIndicator.isVisible = appModel.user != myUserHandle && !isSpecialActionItem
 
+            appRow.setBackgroundResource(
+                if (focusIndicatorStyle == Constants.FocusIndicator.PILL) R.drawable.bg_focus_inverted_selector
+                else android.R.color.transparent
+            )
             appRow.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-                appTitle.isSelected = hasFocus
-                otherProfileIndicator.isSelected = hasFocus
+                updateFocusAppearance(root.context, appTitle, otherProfileIndicator, hasFocus, focusIndicatorStyle)
             }
-            appTitle.isSelected = appRow.isFocused
-            otherProfileIndicator.isSelected = appRow.isFocused
+            updateFocusAppearance(root.context, appTitle, otherProfileIndicator, appRow.isFocused, focusIndicatorStyle)
 
             appRow.setOnClickListener { clickListener(appModel) }
             appRow.setOnLongClickListener {
@@ -422,6 +430,36 @@ class AppDrawerAdapter(
                 appTitle.visibility = View.VISIBLE
             }
             appHide.setOnClickListener { appHideListener(appModel, bindingAdapterPosition) }
+        }
+
+        private fun updateFocusAppearance(
+            context: Context,
+            textView: android.widget.TextView,
+            indicatorView: android.widget.ImageView,
+            active: Boolean,
+            focusIndicatorStyle: Int,
+        ) {
+            if (focusIndicatorStyle == Constants.FocusIndicator.PILL) {
+                textView.setTextColor(
+                    if (active) context.getColor(R.color.black)
+                    else context.getColorFromAttr(R.attr.primaryColor)
+                )
+                textView.paintFlags = textView.paintFlags and Paint.UNDERLINE_TEXT_FLAG.inv()
+                indicatorView.imageTintList = ColorStateList.valueOf(
+                    if (active) context.getColor(R.color.black)
+                    else context.getColorFromAttr(R.attr.primaryColor)
+                )
+            } else {
+                textView.setTextColor(context.getColorFromAttr(R.attr.primaryColor))
+                textView.paintFlags = if (active) {
+                    textView.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+                } else {
+                    textView.paintFlags and Paint.UNDERLINE_TEXT_FLAG.inv()
+                }
+                indicatorView.imageTintList = ColorStateList.valueOf(
+                    context.getColorFromAttr(R.attr.primaryColor)
+                )
+            }
         }
 
         private fun getAppName(context: Context, appPackage: String, user: UserHandle): String {

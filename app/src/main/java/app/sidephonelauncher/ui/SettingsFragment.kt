@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.os.bundleOf
@@ -55,6 +56,12 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
     private val binding get() = _binding!!
     private val showPentastic = System.currentTimeMillis() % 2 == 0L
     private var showInstagram = false
+    private val adminPermissionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == android.app.Activity.RESULT_OK) {
+            prefs.lockModeOn = true
+            populateLockSettings()
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
@@ -87,6 +94,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         populateAlignment()
         populateStatusBar()
         populateNotificationDots()
+        populateFocusIndicatorStyle()
         populateDateTime()
         populateSwipeApps()
         populateSwipeDownAction()
@@ -109,6 +117,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         binding.appsNumSelectLayout.visibility = View.GONE
         binding.dateTimeSelectLayout.visibility = View.GONE
         binding.appThemeSelectLayout.visibility = View.GONE
+        binding.focusIndicatorStyleSelectLayout?.visibility = View.GONE
         binding.swipeDownSelectLayout.visibility = View.GONE
         if (view.id != R.id.textSizeMinus && view.id != R.id.textSizePlus) {
             if (binding.textSizesLayout.isVisible) {
@@ -139,6 +148,9 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
             R.id.alignmentBottom -> updateHomeBottomAlignment()
             R.id.statusBar -> toggleStatusBar()
             R.id.notificationDotsRow -> viewModel.showDialog.postValue(Constants.Dialog.NOTIFICATION_DOTS)
+            R.id.focusIndicatorStyle -> binding.focusIndicatorStyleSelectLayout?.visibility = View.VISIBLE
+            R.id.focusIndicatorPill -> updateFocusIndicatorStyle(Constants.FocusIndicator.PILL)
+            R.id.focusIndicatorUnderline -> updateFocusIndicatorStyle(Constants.FocusIndicator.UNDERLINE)
             R.id.dateTime -> binding.dateTimeSelectLayout.visibility = View.VISIBLE
             R.id.dateTimeOn -> toggleDateTime(Constants.DateTime.ON)
             R.id.dateTimeOff -> toggleDateTime(Constants.DateTime.OFF)
@@ -187,6 +199,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
             R.id.twitter -> requireContext().openUrl(
                 if (showInstagram) Constants.URL_INSTA_TANUJ else Constants.URL_TWITTER_TANUJ
             )
+
             R.id.github -> requireContext().openUrl(Constants.URL_GITHUB_REPO)
             R.id.privacy -> requireContext().openUrl(Constants.URL_PRIVACY_POLICY)
             R.id.footer -> {
@@ -240,6 +253,9 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         binding.alignmentBottom.setOnClickListener(this)
         binding.statusBar.setOnClickListener(this)
         binding.notificationDotsRow.setOnClickListener(this)
+        binding.focusIndicatorStyle?.setOnClickListener(this)
+        binding.focusIndicatorPill?.setOnClickListener(this)
+        binding.focusIndicatorUnderline?.setOnClickListener(this)
         binding.dateTime.setOnClickListener(this)
         binding.dateTimeOn.setOnClickListener(this)
         binding.dateTimeOff.setOnClickListener(this)
@@ -349,6 +365,21 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
         )
     }
 
+    private fun populateFocusIndicatorStyle() {
+        binding.focusIndicatorStyle?.text = getString(
+            when (prefs.focusIndicatorStyle) {
+                Constants.FocusIndicator.PILL -> R.string.pill
+                else -> R.string.underline
+            }
+        )
+    }
+
+    private fun updateFocusIndicatorStyle(style: Int) {
+        prefs.focusIndicatorStyle = style
+        populateFocusIndicatorStyle()
+        requireActivity().recreate()
+    }
+
     private fun toggleDateTime(selected: Int) {
         prefs.dateTimeVisibility = selected
         populateDateTime()
@@ -440,7 +471,7 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
                     DevicePolicyManager.EXTRA_ADD_EXPLANATION,
                     getString(R.string.admin_permission_message)
                 )
-                requireActivity().startActivityForResult(intent, Constants.REQUEST_CODE_ENABLE_ADMIN)
+                adminPermissionLauncher.launch(intent)
             }
         }
         populateLockSettings()
@@ -591,7 +622,10 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
 
     private fun updateHomeBottomAlignment() {
         if (viewModel.isSidePhOnelauncherDefault.value != true) {
-            requireContext().showToast(getString(R.string.please_set_sidephonelauncher_as_default_first), Toast.LENGTH_LONG)
+            requireContext().showToast(
+                getString(R.string.please_set_sidephonelauncher_as_default_first),
+                Toast.LENGTH_LONG
+            )
             return
         }
         prefs.homeBottomAlignment = !prefs.homeBottomAlignment

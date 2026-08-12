@@ -15,6 +15,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.ViewModelProvider
@@ -37,11 +38,11 @@ import app.sidephonelauncher.helper.isEinkDisplay
 import app.sidephonelauncher.helper.isSidePhOnelauncherDefault
 import app.sidephonelauncher.helper.isTablet
 import app.sidephonelauncher.helper.openUrl
+import app.sidephonelauncher.helper.createLauncherSelectorIntent
 import app.sidephonelauncher.helper.rateApp
 import app.sidephonelauncher.helper.resetLauncherViaFakeActivity
 import app.sidephonelauncher.helper.setPlainWallpaper
 import app.sidephonelauncher.helper.shareApp
-import app.sidephonelauncher.helper.showLauncherSelector
 import app.sidephonelauncher.helper.showToast
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -58,6 +59,11 @@ class MainActivity : AppCompatActivity() {
     private var isResumed = false
     private var profileReceiver: BroadcastReceiver? = null
     private var screenStateReceiver: BroadcastReceiver? = null
+    private val launcherSelectorLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            resetLauncherViaFakeActivity()
+        }
+    }
 
 //    override fun onBackPressed() {
 //        if (navController.currentDestination?.id != R.id.mainFragment)
@@ -153,6 +159,7 @@ class MainActivity : AppCompatActivity() {
             KeyEvent.KEYCODE_DPAD_RIGHT,
             KeyEvent.KEYCODE_DPAD_CENTER,
             KeyEvent.KEYCODE_ENTER -> true
+
             else -> false
         }
         if (dpadKey) {
@@ -231,10 +238,13 @@ class MainActivity : AppCompatActivity() {
             openLauncherChooser(it)
         }
         viewModel.resetLauncherLiveData.observe(this) {
-            if (isDefaultLauncher() || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
+            if (isDefaultLauncher() || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                 resetLauncherViaFakeActivity()
-            else
-                showLauncherSelector(Constants.REQUEST_CODE_LAUNCHER_SELECTOR)
+            } else {
+                createLauncherSelectorIntent()?.let { intent ->
+                    launcherSelectorLauncher.launch(intent)
+                }
+            }
         }
         viewModel.checkForMessages.observe(this) {
             checkForMessages()
@@ -242,7 +252,11 @@ class MainActivity : AppCompatActivity() {
         viewModel.showDialog.observe(this) {
             when (it) {
                 Constants.Dialog.ABOUT -> {
-                    showMessageDialog(R.string.app_name, R.string.welcome_to_sidephonelauncher_settings, R.string.okay) {
+                    showMessageDialog(
+                        R.string.app_name,
+                        R.string.welcome_to_sidephonelauncher_settings,
+                        R.string.okay
+                    ) {
                         binding.messageLayout.visibility = View.GONE
                     }
                 }
@@ -300,7 +314,11 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 Constants.Dialog.NOTIFICATION_DOTS -> {
-                    showMessageDialog(R.string.notification_dots, R.string.notification_dots_message, R.string.permission) {
+                    showMessageDialog(
+                        R.string.notification_dots,
+                        R.string.notification_dots_message,
+                        R.string.permission
+                    ) {
                         try {
                             startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
                         } catch (_: Exception) {
@@ -424,8 +442,12 @@ class MainActivity : AppCompatActivity() {
         timerJob?.cancel()
         timerJob = lifecycleScope.launch {
             delay(200)
-            if ((prefs.appTheme == AppCompatDelegate.MODE_NIGHT_YES && getColorFromAttr(R.attr.primaryColor) != getColor(R.color.white))
-                || (prefs.appTheme == AppCompatDelegate.MODE_NIGHT_NO && getColorFromAttr(R.attr.primaryColor) != getColor(R.color.black))
+            if ((prefs.appTheme == AppCompatDelegate.MODE_NIGHT_YES && getColorFromAttr(R.attr.primaryColor) != getColor(
+                    R.color.white
+                ))
+                || (prefs.appTheme == AppCompatDelegate.MODE_NIGHT_NO && getColorFromAttr(R.attr.primaryColor) != getColor(
+                    R.color.black
+                ))
             )
                 restartLauncherOrCheckTheme(true)
         }
@@ -445,21 +467,5 @@ class MainActivity : AppCompatActivity() {
             }
         }
         super.onDestroy()
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        when (requestCode) {
-            Constants.REQUEST_CODE_ENABLE_ADMIN -> {
-                if (resultCode == Activity.RESULT_OK)
-                    prefs.lockModeOn = true
-            }
-
-            Constants.REQUEST_CODE_LAUNCHER_SELECTOR -> {
-                if (resultCode == Activity.RESULT_OK)
-                    resetLauncherViaFakeActivity()
-            }
-        }
     }
 }

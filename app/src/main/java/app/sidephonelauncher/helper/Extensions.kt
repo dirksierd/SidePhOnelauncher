@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.AppOpsManager
 import android.app.SearchManager
 import android.app.role.RoleManager
+import android.hardware.display.DisplayManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -16,11 +17,10 @@ import android.os.UserHandle
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.view.View
-import android.view.WindowManager
+
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.RequiresApi
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+
 import app.sidephonelauncher.BuildConfig
 import app.sidephonelauncher.R
 import app.sidephonelauncher.data.Constants
@@ -29,7 +29,6 @@ import java.util.Locale
 
 fun View.hideKeyboard() {
     clearFocus()
-    ViewCompat.getWindowInsetsController(this)?.hide(WindowInsetsCompat.Type.ime())
     val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.hideSoftInputFromWindow(windowToken, 0)
     post { rootView?.requestApplyInsets() }
@@ -37,22 +36,24 @@ fun View.hideKeyboard() {
 
 fun View.showKeyboard(show: Boolean = true) {
     if (show.not()) return
-    if (this.requestFocus())
+    val targetView = this
+    if (targetView.requestFocus())
         postDelayed({
             val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
+            imm.showSoftInput(targetView, InputMethodManager.SHOW_IMPLICIT)
         }, 100)
 }
 
 
 @RequiresApi(Build.VERSION_CODES.Q)
-fun Activity.showLauncherSelector(requestCode: Int) {
+fun Activity.createLauncherSelectorIntent(): Intent? {
     val roleManager = getSystemService(Context.ROLE_SERVICE) as RoleManager
-    if (roleManager.isRoleAvailable(RoleManager.ROLE_HOME)) {
-        val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_HOME)
-        startActivityForResult(intent, requestCode)
-    } else
+    return if (roleManager.isRoleAvailable(RoleManager.ROLE_HOME)) {
+        roleManager.createRequestRoleIntent(RoleManager.ROLE_HOME)
+    } else {
         resetDefaultLauncher()
+        null
+    }
 }
 
 fun Context.resetDefaultLauncher() {
@@ -95,8 +96,10 @@ fun Context.openSearch(query: String? = null) {
 
 fun Context.isEinkDisplay(): Boolean {
     return try {
-        val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        windowManager.defaultDisplay.refreshRate <= Constants.MIN_ANIM_REFRESH_RATE
+        val displayManager = getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
+        val refreshRate = displayManager.getDisplay(android.view.Display.DEFAULT_DISPLAY)?.refreshRate
+            ?: Float.MAX_VALUE
+        refreshRate <= Constants.MIN_ANIM_REFRESH_RATE
     } catch (e: Exception) {
         e.printStackTrace()
         false
@@ -122,7 +125,10 @@ fun Context.searchOnPlayStore(query: String? = null): Boolean {
     }
 }
 
-fun Context.isPackageInstalled(packageName: String, userHandle: UserHandle = android.os.Process.myUserHandle()): Boolean {
+fun Context.isPackageInstalled(
+    packageName: String,
+    userHandle: UserHandle = android.os.Process.myUserHandle()
+): Boolean {
     val launcher = getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
     val activityInfo = launcher.getActivityList(packageName, userHandle)
     return activityInfo.isNotEmpty()

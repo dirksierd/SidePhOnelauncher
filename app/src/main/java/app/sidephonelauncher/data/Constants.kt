@@ -47,6 +47,11 @@ object Constants {
         const val NOTIFICATIONS = 2
     }
 
+    object FocusIndicator {
+        const val PILL = 1
+        const val UNDERLINE = 2
+    }
+
     object HomeAction {
         const val OPEN_APP_DRAWER = "app.sidephonelauncher.action.OPEN_APP_DRAWER"
         const val OPEN_PHONE = "app.sidephonelauncher.action.OPEN_PHONE"
@@ -103,7 +108,8 @@ object Constants {
 
     const val URL_ABOUT_PAGE = "https://github.com/dirksierd/SidePhOnelauncher#readme"
     const val URL_PRIVACY_POLICY = "https://github.com/dirksierd/SidePhOnelauncher#readme"
-    const val URL_DOUBLE_TAP = "https://tanujnotes.notion.site/Double-tap-to-lock-Olauncher-0f7fb103ec1f47d7a90cdfdcd7fb86ef"
+    const val URL_DOUBLE_TAP =
+        "https://tanujnotes.notion.site/Double-tap-to-lock-Olauncher-0f7fb103ec1f47d7a90cdfdcd7fb86ef"
     const val URL_GITHUB_REPO = "https://github.com/dirksierd/SidePhOnelauncher"
     const val URL_APP_RELEASES = "https://github.com/dirksierd/SidePhOnelauncher/releases/latest"
     const val URL_PRO_LAUNCHER = "https://play.google.com/store/apps/details?id=app.prolauncher"

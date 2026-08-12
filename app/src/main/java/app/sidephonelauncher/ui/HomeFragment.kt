@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherApps
 import android.content.res.Configuration
+import android.graphics.Color
+import android.graphics.Paint
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
@@ -37,6 +39,7 @@ import app.sidephonelauncher.helper.appUsagePermissionGranted
 import app.sidephonelauncher.helper.dpToPx
 import app.sidephonelauncher.helper.expandNotificationDrawer
 import app.sidephonelauncher.helper.getChangedAppTheme
+import app.sidephonelauncher.helper.getColorFromAttr
 import app.sidephonelauncher.helper.getUserHandleFromString
 import app.sidephonelauncher.helper.isPackageInstalled
 import app.sidephonelauncher.helper.openAlarmApp
@@ -389,8 +392,31 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun rememberHomeFocus(view: View, hasFocus: Boolean) {
+        if (view is TextView && view !is HomeAppTextView) {
+            updateHeaderFocusAppearance(view, hasFocus)
+        }
         if (!hasFocus) return
         viewModel.setLastHomeFocusedView(view.id)
+    }
+
+    private fun updateHeaderFocusAppearance(textView: TextView, active: Boolean) {
+        if (prefs.focusIndicatorStyle == Constants.FocusIndicator.PILL) {
+            textView.setBackgroundResource(R.drawable.bg_focus_inverted_selector)
+            textView.setTextColor(
+                if (active) requireContext().getColor(R.color.black)
+                else requireContext().getColorFromAttr(R.attr.primaryColor)
+            )
+            textView.paintFlags = textView.paintFlags and Paint.UNDERLINE_TEXT_FLAG.inv()
+        } else {
+            textView.setBackgroundResource(android.R.color.transparent)
+            textView.setTextColor(requireContext().getColorFromAttr(R.attr.primaryColor))
+            textView.paintFlags = if (active) {
+                textView.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+            } else {
+                textView.paintFlags and Paint.UNDERLINE_TEXT_FLAG.inv()
+            }
+        }
+        textView.setShadowLayer(0f, 0f, 0f, Color.TRANSPARENT)
     }
 
     private fun redirectRootFocusToHomeTargetSafely() {
@@ -903,6 +929,9 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         ).forEach {
             it.isFocusable = true
             it.isFocusableInTouchMode = true
+        }
+        listOf(binding.clock as TextView, binding.date).forEach {
+            updateHeaderFocusAppearance(it, it.hasFocus())
         }
     }
 

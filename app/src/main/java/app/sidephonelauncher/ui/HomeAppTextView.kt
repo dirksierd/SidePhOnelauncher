@@ -7,6 +7,8 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.widget.TextView
 import app.sidephonelauncher.R
+import app.sidephonelauncher.data.Constants
+import app.sidephonelauncher.data.Prefs
 import app.sidephonelauncher.helper.dpToPx
 import app.sidephonelauncher.helper.getColorFromAttr
 
@@ -16,11 +18,9 @@ class HomeAppTextView @JvmOverloads constructor(
     defStyleAttr: Int = android.R.attr.textViewStyle,
 ) : TextView(context, attrs, defStyleAttr) {
 
-    private val activeTextColor = Color.BLACK
+    private val prefs = Prefs(context)
     private val inactiveTextColor = context.getColorFromAttr(R.attr.primaryColor)
-    private val activeHintColor = Color.BLACK
     private val inactiveHintColor = context.getColorFromAttr(R.attr.primaryColorTrans80)
-
     private val dotPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         alpha = 220
@@ -39,6 +39,9 @@ class HomeAppTextView @JvmOverloads constructor(
             paddingEnd + reservedSideSpacePx,
             paddingBottom,
         )
+        setBackgroundResource(
+            if (isPillStyle()) R.drawable.bg_focus_inverted_selector else android.R.color.transparent
+        )
         applyFocusAppearance()
     }
 
@@ -54,9 +57,24 @@ class HomeAppTextView @JvmOverloads constructor(
         if (showNotificationDot) invalidate()
     }
 
+    private fun isPillStyle(): Boolean {
+        return prefs.focusIndicatorStyle == Constants.FocusIndicator.PILL
+    }
+
     private fun applyFocusAppearance(active: Boolean = hasFocus() || isPressed) {
-        super.setTextColor(if (active) activeTextColor else inactiveTextColor)
-        setHintTextColor(if (active) activeHintColor else inactiveHintColor)
+        if (isPillStyle()) {
+            super.setTextColor(if (active) context.getColor(R.color.black) else inactiveTextColor)
+            setHintTextColor(if (active) context.getColor(R.color.black) else inactiveHintColor)
+            paintFlags = paintFlags and Paint.UNDERLINE_TEXT_FLAG.inv()
+        } else {
+            super.setTextColor(inactiveTextColor)
+            setHintTextColor(inactiveHintColor)
+            paintFlags = if (active) {
+                paintFlags or Paint.UNDERLINE_TEXT_FLAG
+            } else {
+                paintFlags and Paint.UNDERLINE_TEXT_FLAG.inv()
+            }
+        }
         setShadowLayer(0f, 0f, 0f, Color.TRANSPARENT)
     }
 
@@ -66,7 +84,7 @@ class HomeAppTextView @JvmOverloads constructor(
         super.onDraw(canvas)
         if (!showNotificationDot) return
 
-        dotPaint.color = if (active) Color.BLACK else Color.WHITE
+        dotPaint.color = if (isPillStyle() && active) Color.BLACK else Color.WHITE
         val cx = width - reservedSideSpacePx / 2f
         val cy = height / 2f
         canvas.drawCircle(cx, cy, dotRadiusPx, dotPaint)

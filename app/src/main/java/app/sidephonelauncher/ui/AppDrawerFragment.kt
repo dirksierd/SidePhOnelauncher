@@ -104,6 +104,7 @@ class AppDrawerFragment : Fragment() {
                     if (event.action == KeyEvent.ACTION_UP) focusSearchInput()
                     true
                 }
+
                 else -> {
                     if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
                     when (keyCode) {
@@ -118,10 +119,12 @@ class AppDrawerFragment : Fragment() {
                             }
                             false
                         }
+
                         KeyEvent.KEYCODE_DEL -> {
                             focusSearchInput()
                             true
                         }
+
                         else -> false
                     }
                 }
@@ -134,6 +137,7 @@ class AppDrawerFragment : Fragment() {
                     if (event.action == KeyEvent.ACTION_UP) findNavController().popBackStack()
                     true
                 }
+
                 else -> {
                     if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
                     when (keyCode) {
@@ -141,6 +145,7 @@ class AppDrawerFragment : Fragment() {
                             focusFirstLaunchableItem()
                             true
                         }
+
                         KeyEvent.KEYCODE_DPAD_LEFT -> handleSearchLeftKey()
                         else -> false
                     }
@@ -154,6 +159,7 @@ class AppDrawerFragment : Fragment() {
                     if (event.action == KeyEvent.ACTION_UP) findNavController().popBackStack()
                     true
                 }
+
                 else -> {
                     if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
                     when (keyCode) {
@@ -161,6 +167,7 @@ class AppDrawerFragment : Fragment() {
                             focusFirstLaunchableItem()
                             true
                         }
+
                         KeyEvent.KEYCODE_DPAD_LEFT -> handleSearchLeftKey()
                         else -> false
                     }
@@ -251,10 +258,13 @@ class AppDrawerFragment : Fragment() {
         val result = try {
             val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             val subtype = imm.currentInputMethodSubtype
+
+            @Suppress("DEPRECATION")
+            val legacyLocale = subtype?.locale.orEmpty()
             val language = when {
                 subtype == null -> ""
                 subtype.languageTag.isNotEmpty() -> subtype.languageTag
-                else -> subtype.locale
+                else -> legacyLocale
             }
             language.startsWith("zh") || language.startsWith("ja") || language.startsWith("ko")
         } catch (e: Exception) {
@@ -268,6 +278,7 @@ class AppDrawerFragment : Fragment() {
         adapter = AppDrawerAdapter(
             flag,
             prefs.appLabelAlignment,
+            prefs.focusIndicatorStyle,
             appClickListener = { appModel ->
                 viewModel.selectedApp(appModel, flag)
                 if (flag == Constants.FLAG_LAUNCH_APP || flag == Constants.FLAG_HIDDEN_APPS)
@@ -503,6 +514,7 @@ class AppDrawerFragment : Fragment() {
                         if (onTop)
                             binding.search.hideKeyboard()
                     }
+
                     RecyclerView.SCROLL_STATE_IDLE -> {
                         if (!recyclerView.canScrollVertically(1))
                             binding.search.hideKeyboard()

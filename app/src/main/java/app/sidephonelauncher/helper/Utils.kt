@@ -16,7 +16,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.Paint
-import android.graphics.Point
+
 import android.net.Uri
 import android.os.Build
 import android.os.UserHandle
@@ -30,6 +30,7 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.WindowManager
+import kotlin.math.roundToInt
 import android.view.animation.LinearInterpolator
 import android.widget.Toast
 import androidx.annotation.AttrRes
@@ -408,10 +409,14 @@ suspend fun setWallpaper(appContext: Context, url: String): Boolean {
 }
 
 fun getScreenDimensions(context: Context): Pair<Int, Int> {
-    val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    val point = Point()
-    windowManager.defaultDisplay.getRealSize(point)
-    return Pair(point.x, point.y)
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val bounds = windowManager.currentWindowMetrics.bounds
+        Pair(bounds.width(), bounds.height())
+    } else {
+        val metrics = context.resources.displayMetrics
+        Pair(metrics.widthPixels, metrics.heightPixels)
+    }
 }
 
 suspend fun getTodaysWallpaper(wallType: String, firstOpenTime: Long): String {
@@ -528,21 +533,20 @@ fun isAccessServiceEnabled(context: Context): Boolean {
         0
     }
     if (enabled == 1) {
-        val enabledServicesString: String? = Settings.Secure.getString(context.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
-        return enabledServicesString?.contains(context.packageName + "/" + MyAccessibilityService::class.java.name) ?: false
+        val enabledServicesString: String? =
+            Settings.Secure.getString(context.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
+        return enabledServicesString?.contains(context.packageName + "/" + MyAccessibilityService::class.java.name)
+            ?: false
     }
     return false
 }
 
 fun isTablet(context: Context): Boolean {
-    val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    val metrics = DisplayMetrics()
-    windowManager.defaultDisplay.getMetrics(metrics)
+    val metrics = context.resources.displayMetrics
     val widthInches = metrics.widthPixels / metrics.xdpi
     val heightInches = metrics.heightPixels / metrics.ydpi
     val diagonalInches = sqrt(widthInches.toDouble().pow(2.0) + heightInches.toDouble().pow(2.0))
-    if (diagonalInches >= 7.0) return true
-    return false
+    return diagonalInches >= 7.0
 }
 
 fun Context.isDarkThemeOn(): Boolean {

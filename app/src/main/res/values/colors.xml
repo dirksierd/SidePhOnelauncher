@@ -8,6 +8,8 @@
     <color name="white">#FFFFFF</color>
     <color name="whiteTrans90">#E6FFFFFF</color>
     <color name="whiteTrans80">#CCFFFFFF</color>
+    <color name="whiteTrans70">#B3FFFFFF</color>
+    <color name="whiteTrans65">#A6FFFFFF</color>
     <color name="whiteTrans50">#80FFFFFF</color>
     <color name="whiteInverse">#000000</color>
     <color name="whiteInverseTrans10">#1A000000</color>

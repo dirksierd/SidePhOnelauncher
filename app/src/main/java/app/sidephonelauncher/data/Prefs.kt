@@ -27,6 +27,8 @@ class Prefs(context: Context) {
     private val DATE_TIME_VISIBILITY = "DATE_TIME_VISIBILITY"
     private val SWIPE_LEFT_ENABLED = "SWIPE_LEFT_ENABLED"
     private val SWIPE_RIGHT_ENABLED = "SWIPE_RIGHT_ENABLED"
+    private val SWIPE_LEFT_ACTION_INITIALIZED = "SWIPE_LEFT_ACTION_INITIALIZED"
+    private val SWIPE_RIGHT_ACTION_INITIALIZED = "SWIPE_RIGHT_ACTION_INITIALIZED"
     private val HIDDEN_APPS = "HIDDEN_APPS"
     private val HIDDEN_APPS_UPDATED = "HIDDEN_APPS_UPDATED"
     private val SHOW_HINT_COUNTER = "SHOW_HINT_COUNTER"
@@ -386,11 +388,11 @@ class Prefs(context: Context) {
         set(value) = prefs.edit { putString(APP_USER_8, value).apply() }
 
     var appNameSwipeLeft: String
-        get() = prefs.getString(APP_NAME_SWIPE_LEFT, "Camera").toString()
+        get() = prefs.getString(APP_NAME_SWIPE_LEFT, "").toString()
         set(value) = prefs.edit { putString(APP_NAME_SWIPE_LEFT, value).apply() }
 
     var appNameSwipeRight: String
-        get() = prefs.getString(APP_NAME_SWIPE_RIGHT, "Phone").toString()
+        get() = prefs.getString(APP_NAME_SWIPE_RIGHT, "").toString()
         set(value) = prefs.edit { putString(APP_NAME_SWIPE_RIGHT, value).apply() }
 
     var appPackageSwipeLeft: String
@@ -532,6 +534,40 @@ class Prefs(context: Context) {
     var isShortcutSwipeRight: Boolean
         get() = prefs.getBoolean(IS_SHORTCUT_SWIPE_RIGHT, false)
         set(value) = prefs.edit { putBoolean(IS_SHORTCUT_SWIPE_RIGHT, value) }
+
+    private var swipeLeftActionInitialized: Boolean
+        get() = prefs.getBoolean(SWIPE_LEFT_ACTION_INITIALIZED, false)
+        set(value) = prefs.edit { putBoolean(SWIPE_LEFT_ACTION_INITIALIZED, value).apply() }
+
+    private var swipeRightActionInitialized: Boolean
+        get() = prefs.getBoolean(SWIPE_RIGHT_ACTION_INITIALIZED, false)
+        set(value) = prefs.edit { putBoolean(SWIPE_RIGHT_ACTION_INITIALIZED, value).apply() }
+
+    fun ensureSwipeActionDefaults() {
+        if (!swipeLeftActionInitialized) {
+            if (appPackageSwipeLeft.isEmpty() && shortcutIdSwipeLeft.isEmpty() && !isShortcutSwipeLeft) {
+                appNameSwipeLeft = "Open app drawer"
+                appPackageSwipeLeft = Constants.HomeAction.OPEN_APP_DRAWER
+                appActivityClassNameSwipeLeft = ""
+                appUserSwipeLeft = ""
+                isShortcutSwipeLeft = false
+                shortcutIdSwipeLeft = ""
+            }
+            swipeLeftActionInitialized = true
+        }
+
+        if (!swipeRightActionInitialized) {
+            if (appPackageSwipeRight.isEmpty() && shortcutIdSwipeRight.isEmpty() && !isShortcutSwipeRight) {
+                appNameSwipeRight = "Phone"
+                appPackageSwipeRight = Constants.HomeAction.OPEN_PHONE
+                appActivityClassNameRight = ""
+                appUserSwipeRight = ""
+                isShortcutSwipeRight = false
+                shortcutIdSwipeRight = ""
+            }
+            swipeRightActionInitialized = true
+        }
+    }
 
     fun getAppName(location: Int): String {
         return when (location) {

@@ -27,8 +27,8 @@
     <string name="right">שמאל</string>
     <string name="center">מרכז</string>
     <string name="home_layout_alignment">יישור היישומים</string>
-    <string name="swipe_left_app">יישום לפתיחה בהחלקה שמאלה</string>
-    <string name="swipe_right_app">יישום לפתיחה בהחלקה ימינה</string>
+    <string name="swipe_left_app">החלקה שמאלה / ימינה ב-D-pad</string>
+    <string name="swipe_right_app">החלקה ימינה / שמאלה ב-D-pad</string>
     <string name="_0">0</string>
     <string name="_1">1</string>
     <string name="_2">2</string>

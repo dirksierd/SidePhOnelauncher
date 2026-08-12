@@ -53,8 +53,8 @@
     <string name="right">Right</string>
     <string name="center">Center</string>
     <string name="home_layout_alignment">App alignment</string>
-    <string name="swipe_left_app">Swipe left app</string>
-    <string name="swipe_right_app">Swipe right app</string>
+    <string name="swipe_left_app">Swipe left / d-pad right</string>
+    <string name="swipe_right_app">Swipe right / d-pad left</string>
     <string name="_0">0</string>
     <string name="_1">1</string>
     <string name="_2">2</string>
@@ -115,6 +115,7 @@
     <string name="swipe_down_for">Swipe down for</string>
     <string name="search">Search</string>
     <string name="notifications">Notifications</string>
+    <string name="open_app_drawer">Open app drawer</string>
     <string name="notification_dots">Notification dots</string>
     <string name="notification_dots_message">To show/hide notification dots on the home screen, please allow or disallow notification access for SidePhOnelauncher.
         

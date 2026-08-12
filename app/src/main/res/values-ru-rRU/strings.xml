@@ -29,8 +29,8 @@
     <string name="right">Справа</string>
     <string name="center">Центр</string>
     <string name="home_layout_alignment">Расположение приложений</string>
-    <string name="swipe_left_app">Свайп влево</string>
-    <string name="swipe_right_app">Свайп вправо</string>
+    <string name="swipe_left_app">Свайп влево / d-pad вправо</string>
+    <string name="swipe_right_app">Свайп вправо / d-pad влево</string>
     <string name="_0">0</string>
     <string name="_1">1</string>
     <string name="_2">2</string>

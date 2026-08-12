@@ -16,6 +16,7 @@ import android.view.inputmethod.BaseInputConnection
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -82,55 +83,88 @@ class AppDrawerFragment : Fragment() {
         initObservers()
         initClickListeners()
         initKeyNavigation()
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                when {
+                    isDrawerListFocused() -> focusSearchInput()
+                    binding.search.hasFocus() || searchTextView?.hasFocus() == true -> findNavController().popBackStack()
+                    else -> {
+                        isEnabled = false
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                    }
+                }
+            }
+        })
     }
 
     private fun initKeyNavigation() {
         binding.recyclerView.setOnKeyListener { _, keyCode, event ->
-            if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
             when (keyCode) {
-                KeyEvent.KEYCODE_DPAD_UP -> {
-                    if (!binding.recyclerView.canScrollVertically(-1)) {
-                        val firstVisible = (binding.recyclerView.layoutManager as? LinearLayoutManager)
-                            ?.findFirstVisibleItemPosition() ?: -1
-                        if (firstVisible <= 0) {
-                            binding.search.requestFocus()
-                            return@setOnKeyListener true
+                KeyEvent.KEYCODE_BACK -> {
+                    if (event.action == KeyEvent.ACTION_UP) focusSearchInput()
+                    true
+                }
+                else -> {
+                    if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
+                    when (keyCode) {
+                        KeyEvent.KEYCODE_DPAD_UP -> {
+                            if (!binding.recyclerView.canScrollVertically(-1)) {
+                                val firstVisible = (binding.recyclerView.layoutManager as? LinearLayoutManager)
+                                    ?.findFirstVisibleItemPosition() ?: -1
+                                if (firstVisible <= 0) {
+                                    focusSearchInput()
+                                    return@setOnKeyListener true
+                                }
+                            }
+                            false
                         }
+                        KeyEvent.KEYCODE_DEL -> {
+                            focusSearchInput()
+                            true
+                        }
+                        else -> false
                     }
-                    false
                 }
-                KeyEvent.KEYCODE_DEL -> {
-                    val query = binding.search.query
-                    if (query.isNullOrEmpty()) {
-                        findNavController().popBackStack()
-                        true
-                    } else false
-                }
-                else -> false
             }
         }
 
         binding.search.setOnKeyListener { _, keyCode, event ->
-            if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
             when (keyCode) {
-                KeyEvent.KEYCODE_DPAD_DOWN -> {
-                    focusFirstLaunchableItem()
+                KeyEvent.KEYCODE_BACK -> {
+                    if (event.action == KeyEvent.ACTION_UP) findNavController().popBackStack()
                     true
                 }
-                KeyEvent.KEYCODE_DPAD_LEFT -> handleSearchLeftKey()
-                else -> false
+                else -> {
+                    if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
+                    when (keyCode) {
+                        KeyEvent.KEYCODE_DPAD_DOWN -> {
+                            focusFirstLaunchableItem()
+                            true
+                        }
+                        KeyEvent.KEYCODE_DPAD_LEFT -> handleSearchLeftKey()
+                        else -> false
+                    }
+                }
             }
         }
 
         searchTextView?.setOnKeyListener { _, keyCode, event ->
-            if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
             when (keyCode) {
-                KeyEvent.KEYCODE_DPAD_DOWN -> {
-                    focusFirstLaunchableItem()
+                KeyEvent.KEYCODE_BACK -> {
+                    if (event.action == KeyEvent.ACTION_UP) findNavController().popBackStack()
                     true
                 }
-                KeyEvent.KEYCODE_DPAD_LEFT -> handleSearchLeftKey()
-                else -> false
+                else -> {
+                    if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
+                    when (keyCode) {
+                        KeyEvent.KEYCODE_DPAD_DOWN -> {
+                            focusFirstLaunchableItem()
+                            true
+                        }
+                        KeyEvent.KEYCODE_DPAD_LEFT -> handleSearchLeftKey()
+                        else -> false
+                    }
+                }
             }
         }
     }
@@ -138,6 +172,20 @@ class AppDrawerFragment : Fragment() {
     private fun handleSearchLeftKey(): Boolean {
         findNavController().popBackStack()
         return true
+    }
+
+    private fun isDrawerListFocused(): Boolean {
+        return binding.recyclerView.hasFocus() || binding.recyclerView.findFocus() != null
+    }
+
+    private fun focusSearchInput() {
+        binding.search.isIconified = false
+        binding.search.requestFocus()
+        searchTextView?.apply {
+            requestFocus()
+            setSelection(text?.length ?: 0)
+        }
+        binding.search.showKeyboard(prefs.autoShowKeyboard)
     }
 
     private fun initViews() {
@@ -159,6 +207,10 @@ class AppDrawerFragment : Fragment() {
     }
 
     private fun initSearch() {
+        binding.search.onBackPressed = {
+            findNavController().popBackStack()
+            true
+        }
         binding.search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (query?.startsWith("!") == true)
@@ -294,6 +346,10 @@ class AppDrawerFragment : Fragment() {
                 viewModel.getAppList()
             },
             appLeftListener = ::handleSearchLeftKey,
+            appBackListener = {
+                focusSearchInput()
+                true
+            },
             privateSpaceToggleListener = {
                 viewModel.togglePrivateSpaceLock()
             },
@@ -359,6 +415,20 @@ class AppDrawerFragment : Fragment() {
     private fun updateCombinedAppList() {
         val apps = currentAppList ?: return
         val combined = apps.toMutableList()
+
+        if (flag == Constants.FLAG_SET_SWIPE_LEFT_APP || flag == Constants.FLAG_SET_SWIPE_RIGHT_APP) {
+            combined.add(
+                0,
+                AppModel.App(
+                    appLabel = getString(R.string.open_app_drawer),
+                    key = null,
+                    appPackage = Constants.HomeAction.OPEN_APP_DRAWER,
+                    activityClassName = null,
+                    isNew = false,
+                    user = Process.myUserHandle(),
+                )
+            )
+        }
 
         if (flag == Constants.FLAG_LAUNCH_APP && currentPrivateSpaceAvailable) {
             combined.add(AppModel.PrivateSpaceHeader(isLocked = currentPrivateSpaceLocked))

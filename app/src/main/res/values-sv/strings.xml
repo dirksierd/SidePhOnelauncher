@@ -28,8 +28,8 @@
     <string name="right">Höger</string>
     <string name="center">Mitten</string>
     <string name="home_layout_alignment">App-placering</string>
-    <string name="swipe_left_app">Vänstersvepsapp</string>
-    <string name="swipe_right_app">Högersvepsapp</string>
+    <string name="swipe_left_app">Svep vänster / styrkors höger</string>
+    <string name="swipe_right_app">Svep höger / styrkors vänster</string>
     <string name="_0">0</string>
     <string name="_1">1</string>
     <string name="_2">2</string>

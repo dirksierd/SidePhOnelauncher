@@ -47,6 +47,11 @@ object Constants {
         const val NOTIFICATIONS = 2
     }
 
+    object HomeAction {
+        const val OPEN_APP_DRAWER = "app.sidephonelauncher.action.OPEN_APP_DRAWER"
+        const val OPEN_PHONE = "app.sidephonelauncher.action.OPEN_PHONE"
+    }
+
     object CharacterIndicator {
         const val SHOW = 102
         const val HIDE = 101

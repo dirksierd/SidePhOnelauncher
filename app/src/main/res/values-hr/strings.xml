@@ -28,8 +28,8 @@
     <string name="right">Desno</string>
     <string name="center">Sredina</string>
     <string name="home_layout_alignment">Poravnanje aplikacija</string>
-    <string name="swipe_left_app">Aplikacija za lijevi potez</string>
-    <string name="swipe_right_app">Aplikacija za desni potez</string>
+    <string name="swipe_left_app">Povuci lijevo / desno na D-padu</string>
+    <string name="swipe_right_app">Povuci desno / lijevo na D-padu</string>
     <string name="_0">0</string>
     <string name="_1">1</string>
     <string name="_2">2</string>

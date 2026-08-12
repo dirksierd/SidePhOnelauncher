@@ -75,8 +75,8 @@
     <string name="right">右</string>
     <string name="center">中心</string>
     <string name="home_layout_alignment">アプリの調整</string>
-    <string name="swipe_left_app">アプリを左にスワイプ</string>
-    <string name="swipe_right_app">アプリを右にスワイプ</string>
+    <string name="swipe_left_app">左にスワイプ / 右Dパッド</string>
+    <string name="swipe_right_app">右にスワイプ / 左Dパッド</string>
     <string name="auto_show_keyboard">キーボードの自動表示</string>
     <string name="hide">隠れる</string>
     <string name="status_bar">ステータスバーを表示する</string>

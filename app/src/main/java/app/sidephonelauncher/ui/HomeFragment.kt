@@ -61,7 +61,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private var dpadLeftKeyDownTime = 0L
     private val notificationDotListener: () -> Unit = {
         activity?.runOnUiThread {
             updateHomeNotificationDotsSafely()
@@ -76,6 +75,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         prefs = Prefs(requireContext())
+        prefs.ensureSwipeActionDefaults()
         viewModel = activity?.run {
             ViewModelProvider(this)[MainViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
@@ -92,7 +92,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     override fun onResume() {
         super.onResume()
         NotificationDotRepository.addListener(notificationDotListener)
-        dpadLeftKeyDownTime = 0L
         populateHomeScreen(false)
         viewModel.isSidePhOnelauncherDefault()
         if (prefs.showStatusBar) showStatusBar()
@@ -228,6 +227,61 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
     }
 
+    fun handleSideDpadKeyEvent(event: KeyEvent): Boolean {
+        return when (event.keyCode) {
+            KeyEvent.KEYCODE_DPAD_LEFT -> {
+                if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
+                    openSwipeRightApp()
+                }
+                event.action == KeyEvent.ACTION_DOWN || event.action == KeyEvent.ACTION_UP
+            }
+            KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
+                    openSwipeLeftApp()
+                }
+                event.action == KeyEvent.ACTION_DOWN || event.action == KeyEvent.ACTION_UP
+            }
+            else -> false
+        }
+    }
+
+    fun shouldHandleUnfocusedDpadKeyEvent(): Boolean {
+        val focusedView = activity?.currentFocus
+        return focusedView == null
+            || focusedView == binding.mainLayout
+            || getVisibleHomeApps().none { it == focusedView }
+    }
+
+    fun handleUnfocusedDpadKeyEvent(event: KeyEvent): Boolean {
+        val visibleApps = getVisibleHomeApps()
+        if (visibleApps.isEmpty()) return false
+        return when (event.keyCode) {
+            KeyEvent.KEYCODE_DPAD_LEFT -> {
+                if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
+                    openSwipeRightApp()
+                }
+                true
+            }
+            KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
+                    openSwipeLeftApp()
+                }
+                true
+            }
+            KeyEvent.KEYCODE_DPAD_UP,
+            KeyEvent.KEYCODE_DPAD_DOWN,
+            KeyEvent.KEYCODE_DPAD_CENTER,
+            KeyEvent.KEYCODE_ENTER,
+            KeyEvent.KEYCODE_NUMPAD_ENTER -> {
+                if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
+                    redirectRootFocusToHomeAppSafely()
+                }
+                true
+            }
+            else -> false
+        }
+    }
+
     private fun handleHomeKeyEvent(keyCode: Int, event: KeyEvent): Boolean {
         val visibleApps = getVisibleHomeApps()
         if (visibleApps.isEmpty()) return false
@@ -236,7 +290,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             when (keyCode) {
                 KeyEvent.KEYCODE_DPAD_UP,
                 KeyEvent.KEYCODE_DPAD_DOWN,
-                KeyEvent.KEYCODE_DPAD_LEFT,
                 KeyEvent.KEYCODE_DPAD_CENTER,
                 KeyEvent.KEYCODE_ENTER,
                 KeyEvent.KEYCODE_NUMPAD_ENTER -> {
@@ -245,9 +298,15 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                     }
                     return true
                 }
+                KeyEvent.KEYCODE_DPAD_LEFT -> {
+                    if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
+                        openSwipeRightApp()
+                    }
+                    return true
+                }
                 KeyEvent.KEYCODE_DPAD_RIGHT -> {
                     if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
-                        showAppList(Constants.FLAG_LAUNCH_APP)
+                        openSwipeLeftApp()
                     }
                     return true
                 }
@@ -276,19 +335,13 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                         return true
                     }
                     KeyEvent.KEYCODE_DPAD_LEFT -> {
-                        if (dpadLeftKeyDownTime == 0L) dpadLeftKeyDownTime = System.currentTimeMillis()
-                        if (event.repeatCount > 0) {
-                            val elapsed = System.currentTimeMillis() - dpadLeftKeyDownTime
-                            if (elapsed >= Constants.LONG_PRESS_DELAY_MS) {
-                                dpadLeftKeyDownTime = 0L
-                                openSwipeLeftApp()
-                            }
-                        }
+                        if (event.repeatCount > 0) return true
+                        openSwipeRightApp()
                         return true
                     }
                     KeyEvent.KEYCODE_DPAD_RIGHT -> {
                         if (event.repeatCount > 0) return true
-                        showAppList(Constants.FLAG_LAUNCH_APP)
+                        openSwipeLeftApp()
                         return true
                     }
                     KeyEvent.KEYCODE_DPAD_CENTER,
@@ -299,10 +352,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             KeyEvent.ACTION_UP -> {
                 when (keyCode) {
                     KeyEvent.KEYCODE_DPAD_DOWN -> return true
-                    KeyEvent.KEYCODE_DPAD_LEFT -> {
-                        dpadLeftKeyDownTime = 0L
-                        return true
-                    }
+                    KeyEvent.KEYCODE_DPAD_LEFT -> return true
                     KeyEvent.KEYCODE_DPAD_RIGHT -> return true
                     KeyEvent.KEYCODE_DPAD_CENTER,
                     KeyEvent.KEYCODE_ENTER,
@@ -394,10 +444,16 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                         }
                         true
                     }
+                    KeyEvent.KEYCODE_DPAD_LEFT -> {
+                        if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener true
+                        if (event.repeatCount > 0) return@setOnKeyListener true
+                        openSwipeRightApp()
+                        true
+                    }
                     KeyEvent.KEYCODE_DPAD_RIGHT -> {
                         if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener true
                         if (event.repeatCount > 0) return@setOnKeyListener true
-                        showAppList(Constants.FLAG_LAUNCH_APP)
+                        openSwipeLeftApp()
                         true
                     }
                     KeyEvent.KEYCODE_ENTER,
@@ -719,27 +775,55 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     private fun openSwipeRightApp() {
         if (!prefs.swipeRightEnabled) return
-        launchAppOrShortcut(
+        launchHomeSideAction(
             appName = prefs.appNameSwipeRight,
             packageName = prefs.appPackageSwipeRight,
             activityClassName = prefs.appActivityClassNameRight,
             shortcutId = prefs.shortcutIdSwipeRight,
             isShortcut = prefs.isShortcutSwipeRight,
             userString = prefs.appUserSwipeRight,
-            fallback = { openDialerApp(requireContext()) }
         )
     }
 
     private fun openSwipeLeftApp() {
         if (!prefs.swipeLeftEnabled) return
-        launchAppOrShortcut(
+        launchHomeSideAction(
             appName = prefs.appNameSwipeLeft,
             packageName = prefs.appPackageSwipeLeft,
             activityClassName = prefs.appActivityClassNameSwipeLeft,
             shortcutId = prefs.shortcutIdSwipeLeft,
             isShortcut = prefs.isShortcutSwipeLeft,
             userString = prefs.appUserSwipeLeft,
-            fallback = { openCameraApp(requireContext()) }
+        )
+    }
+
+    private fun launchHomeSideAction(
+        appName: String,
+        packageName: String,
+        activityClassName: String?,
+        shortcutId: String?,
+        isShortcut: Boolean,
+        userString: String,
+        fallback: (() -> Unit)? = null,
+    ) {
+        when (packageName) {
+            Constants.HomeAction.OPEN_APP_DRAWER -> {
+                showAppList(Constants.FLAG_LAUNCH_APP)
+                return
+            }
+            Constants.HomeAction.OPEN_PHONE -> {
+                openDialerApp(requireContext())
+                return
+            }
+        }
+        launchAppOrShortcut(
+            appName = appName,
+            packageName = packageName,
+            activityClassName = activityClassName,
+            shortcutId = shortcutId,
+            isShortcut = isShortcut,
+            userString = userString,
+            fallback = fallback,
         )
     }
 

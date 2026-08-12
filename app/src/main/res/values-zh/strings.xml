@@ -66,8 +66,8 @@
     <string name="right">右对齐</string>
     <string name="center">居中</string>
     <string name="home_layout_alignment">应用对齐方式</string>
-    <string name="swipe_left_app">向左滑动应用程序</string>
-    <string name="swipe_right_app">向右滑动应用程序</string>
+    <string name="swipe_left_app">左滑 / 方向键右</string>
+    <string name="swipe_right_app">右滑 / 方向键左</string>
     <string name="_0">0</string>
     <string name="_1">1</string>
     <string name="_2">2</string>

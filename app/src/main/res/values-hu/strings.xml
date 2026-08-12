@@ -28,8 +28,8 @@
     <string name="right">Jobb</string>
     <string name="center">Közép</string>
     <string name="home_layout_alignment">Ikonok elhelyezkedése</string>
-    <string name="swipe_left_app">Balra simítva indítható alkalmazás</string>
-    <string name="swipe_right_app">Jobbra simítva indítható alkalmazás</string>
+    <string name="swipe_left_app">Balra húzás / d-pad jobbra</string>
+    <string name="swipe_right_app">Jobbra húzás / d-pad balra</string>
     <string name="_0">0</string>
     <string name="_1">1</string>
     <string name="_2">2</string>

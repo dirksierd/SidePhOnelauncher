@@ -21,9 +21,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import app.sidephonelauncher.data.Constants
 import app.sidephonelauncher.data.Prefs
 import app.sidephonelauncher.databinding.ActivityMainBinding
+import app.sidephonelauncher.ui.HomeFragment
 import app.sidephonelauncher.helper.getColorFromAttr
 import app.sidephonelauncher.helper.hasBeenDays
 import app.sidephonelauncher.helper.hasBeenHours
@@ -138,15 +140,27 @@ class MainActivity : AppCompatActivity() {
         }
         if (dpadKey) {
             val focusedView = currentFocus
+            val currentFragment = getCurrentNavFragment()
+            if (currentFragment is HomeFragment && currentFragment.handleSideDpadKeyEvent(event)) {
+                return true
+            }
+            if (currentFragment is HomeFragment && currentFragment.shouldHandleUnfocusedDpadKeyEvent()) {
+                if (currentFragment.handleUnfocusedDpadKeyEvent(event)) return true
+            }
             if (focusedView == null || focusedView == window.decorView) {
-                val navHost = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
-                val currentFragment = navHost?.childFragmentManager?.fragments?.firstOrNull()
                 val fragmentView = currentFragment?.view
                 if (fragmentView != null && fragmentView.dispatchKeyEvent(event)) return true
             }
         }
         return super.dispatchKeyEvent(event)
     }
+
+    private fun getCurrentNavFragment() =
+        (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as? NavHostFragment)
+            ?.childFragmentManager
+            ?.run {
+                primaryNavigationFragment ?: fragments.lastOrNull { it.isVisible }
+            }
 
     override fun onStart() {
         super.onStart()

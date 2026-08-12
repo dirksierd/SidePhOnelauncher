@@ -36,6 +36,7 @@ class AppDrawerAdapter(
     private val appHideListener: (AppModel, Int) -> Unit,
     private val appRenameListener: (AppModel, String) -> Unit,
     private val appLeftListener: () -> Boolean = { false },
+    private val appBackListener: () -> Boolean = { false },
     private val privateSpaceToggleListener: () -> Unit = {},
     private val privateSpaceSettingsListener: () -> Unit = {},
 ) : ListAdapter<AppModel, RecyclerView.ViewHolder>(DIFF_CALLBACK), Filterable {
@@ -132,6 +133,7 @@ class AppDrawerAdapter(
                     appHideListener,
                     appRenameListener,
                     appLeftListener,
+                    appBackListener,
                 )
                 is SpacerViewHolder -> Unit
             }
@@ -262,20 +264,24 @@ class AppDrawerAdapter(
             appHideListener: (AppModel, Int) -> Unit,
             appRenameListener: (AppModel, String) -> Unit,
             appLeftListener: () -> Boolean,
+            appBackListener: () -> Boolean,
         ) = with(binding) {
             appHideLayout.visibility = View.GONE
             renameLayout.visibility = View.GONE
             appTitle.visibility = View.VISIBLE
+
+            val isSpecialActionItem = appModel.appPackage == Constants.HomeAction.OPEN_APP_DRAWER
 
             appTitle.text = buildString {
                 append(appModel.appLabel)
                 if (appModel.isNew) append(" ✦")
             }
             appTitle.gravity = appLabelGravity
-            otherProfileIndicator.isVisible = appModel.user != myUserHandle
+            otherProfileIndicator.isVisible = appModel.user != myUserHandle && !isSpecialActionItem
 
             appRow.setOnClickListener { clickListener(appModel) }
             appRow.setOnLongClickListener {
+                if (isSpecialActionItem) return@setOnLongClickListener true
                 if (appModel.appPackage.isNotEmpty()) {
                     appDelete.alpha = when (
                         appModel is AppModel.PinnedShortcut || !root.context.isSystemApp(appModel.appPackage, appModel.user)
@@ -318,6 +324,13 @@ class AppDrawerAdapter(
                     }
                     KeyEvent.KEYCODE_DPAD_LEFT -> {
                         if (event.action == KeyEvent.ACTION_DOWN) appLeftListener() else false
+                    }
+                    KeyEvent.KEYCODE_BACK -> {
+                        when (event.action) {
+                            KeyEvent.ACTION_DOWN -> true
+                            KeyEvent.ACTION_UP -> appBackListener()
+                            else -> false
+                        }
                     }
                     else -> false
                 }

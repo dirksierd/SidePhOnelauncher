@@ -93,6 +93,7 @@ class AppDrawerAdapter(
                     false
                 )
             )
+
             VIEW_TYPE_SPACER -> SpacerViewHolder(
                 AdapterAppDrawerSpacerBinding.inflate(
                     LayoutInflater.from(parent.context),
@@ -100,6 +101,7 @@ class AppDrawerAdapter(
                     false
                 )
             )
+
             else -> ViewHolder(
                 AdapterAppDrawerBinding.inflate(
                     LayoutInflater.from(parent.context),
@@ -122,6 +124,7 @@ class AppDrawerAdapter(
                         privateSpaceSettingsListener,
                     )
                 }
+
                 is ViewHolder -> holder.bind(
                     flag,
                     appLabelGravity,
@@ -135,6 +138,7 @@ class AppDrawerAdapter(
                     appLeftListener,
                     appBackListener,
                 )
+
                 is SpacerViewHolder -> Unit
             }
         } catch (e: Exception) {
@@ -155,8 +159,8 @@ class AppDrawerAdapter(
                 } else {
                     appsList.filter { app ->
                         app !is AppModel.PrivateSpaceHeader
-                            && app !is AppModel.Spacer
-                            && appLabelMatches(app.appLabel, charSearch)
+                                && app !is AppModel.Spacer
+                                && appLabelMatches(app.appLabel, charSearch)
                     }.toMutableList()
                 }.appendSpacerItem()
 
@@ -182,8 +186,8 @@ class AppDrawerAdapter(
         try {
             val launchableResults = appFilteredList.filter {
                 it !is AppModel.PrivateSpaceHeader
-                    && it !is AppModel.Spacer
-                    && it.appPackage.isNotBlank()
+                        && it !is AppModel.Spacer
+                        && it.appPackage.isNotBlank()
             }
             if (launchableResults.size == 1
                 && autoLaunch
@@ -279,12 +283,22 @@ class AppDrawerAdapter(
             appTitle.gravity = appLabelGravity
             otherProfileIndicator.isVisible = appModel.user != myUserHandle && !isSpecialActionItem
 
+            appRow.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+                appTitle.isSelected = hasFocus
+                otherProfileIndicator.isSelected = hasFocus
+            }
+            appTitle.isSelected = appRow.isFocused
+            otherProfileIndicator.isSelected = appRow.isFocused
+
             appRow.setOnClickListener { clickListener(appModel) }
             appRow.setOnLongClickListener {
                 if (isSpecialActionItem) return@setOnLongClickListener true
                 if (appModel.appPackage.isNotEmpty()) {
                     appDelete.alpha = when (
-                        appModel is AppModel.PinnedShortcut || !root.context.isSystemApp(appModel.appPackage, appModel.user)
+                        appModel is AppModel.PinnedShortcut || !root.context.isSystemApp(
+                            appModel.appPackage,
+                            appModel.user
+                        )
                     ) {
                         true -> 1.0f
                         false -> 0.5f
@@ -315,16 +329,20 @@ class AppDrawerAdapter(
                                 }
                                 true
                             }
+
                             KeyEvent.ACTION_UP -> {
                                 if (event.repeatCount == 0) appRow.performClick()
                                 true
                             }
+
                             else -> false
                         }
                     }
+
                     KeyEvent.KEYCODE_DPAD_LEFT -> {
                         if (event.action == KeyEvent.ACTION_DOWN) appLeftListener() else false
                     }
+
                     KeyEvent.KEYCODE_BACK -> {
                         when (event.action) {
                             KeyEvent.ACTION_DOWN -> true
@@ -332,6 +350,7 @@ class AppDrawerAdapter(
                             else -> false
                         }
                     }
+
                     else -> false
                 }
             }

@@ -157,18 +157,21 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 prefs.clockAppClassName = ""
                 prefs.clockAppUser = ""
             }
+
             R.id.date -> {
                 showAppList(Constants.FLAG_SET_CALENDAR_APP)
                 prefs.calendarAppPackage = ""
                 prefs.calendarAppClassName = ""
                 prefs.calendarAppUser = ""
             }
+
             R.id.tvScreenTime -> {
                 showAppList(Constants.FLAG_SET_SCREEN_TIME_APP)
                 prefs.screenTimeAppPackage = ""
                 prefs.screenTimeAppClassName = ""
                 prefs.screenTimeAppUser = ""
             }
+
             R.id.setDefaultLauncher -> {
                 prefs.hideSetDefaultLauncher = true
                 binding.setDefaultLauncher.visibility = View.GONE
@@ -235,12 +238,14 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 }
                 event.action == KeyEvent.ACTION_DOWN || event.action == KeyEvent.ACTION_UP
             }
+
             KeyEvent.KEYCODE_DPAD_RIGHT -> {
                 if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
                     openSwipeLeftApp()
                 }
                 event.action == KeyEvent.ACTION_DOWN || event.action == KeyEvent.ACTION_UP
             }
+
             else -> false
         }
     }
@@ -248,8 +253,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     fun shouldHandleUnfocusedDpadKeyEvent(): Boolean {
         val focusedView = activity?.currentFocus
         return focusedView == null
-            || focusedView == binding.mainLayout
-            || getFocusableHomeTargets().none { it == focusedView }
+                || focusedView == binding.mainLayout
+                || getFocusableHomeTargets().none { it == focusedView }
     }
 
     fun handleUnfocusedDpadKeyEvent(event: KeyEvent): Boolean {
@@ -260,12 +265,14 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 }
                 true
             }
+
             KeyEvent.KEYCODE_DPAD_RIGHT -> {
                 if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
                     openSwipeLeftApp()
                 }
                 true
             }
+
             KeyEvent.KEYCODE_DPAD_UP,
             KeyEvent.KEYCODE_DPAD_DOWN,
             KeyEvent.KEYCODE_DPAD_CENTER,
@@ -276,6 +283,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 }
                 true
             }
+
             else -> false
         }
     }
@@ -295,12 +303,14 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                     }
                     return true
                 }
+
                 KeyEvent.KEYCODE_DPAD_LEFT -> {
                     if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
                         openSwipeRightApp()
                     }
                     return true
                 }
+
                 KeyEvent.KEYCODE_DPAD_RIGHT -> {
                     if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
                         openSwipeLeftApp()
@@ -324,6 +334,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                         }
                         return true
                     }
+
                     KeyEvent.KEYCODE_DPAD_DOWN -> {
                         if (event.repeatCount > 0) return true
                         if (focusedIndex < visibleApps.size - 1) {
@@ -331,21 +342,25 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                         }
                         return true
                     }
+
                     KeyEvent.KEYCODE_DPAD_LEFT -> {
                         if (event.repeatCount > 0) return true
                         openSwipeRightApp()
                         return true
                     }
+
                     KeyEvent.KEYCODE_DPAD_RIGHT -> {
                         if (event.repeatCount > 0) return true
                         openSwipeLeftApp()
                         return true
                     }
+
                     KeyEvent.KEYCODE_DPAD_CENTER,
                     KeyEvent.KEYCODE_ENTER,
                     KeyEvent.KEYCODE_NUMPAD_ENTER -> return false
                 }
             }
+
             KeyEvent.ACTION_UP -> {
                 when (keyCode) {
                     KeyEvent.KEYCODE_DPAD_DOWN -> return true
@@ -467,6 +482,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                         }
                         true
                     }
+
                     KeyEvent.KEYCODE_DPAD_DOWN -> {
                         if (event.action != KeyEvent.ACTION_DOWN || event.repeatCount > 0) return@setOnKeyListener true
                         val headerTargets = getTopHomeHeaderTargets()
@@ -475,24 +491,28 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                             currentIndex in 0 until headerTargets.lastIndex -> {
                                 headerTargets[currentIndex + 1].requestFocus()
                             }
+
                             else -> {
                                 getVisibleHomeApps().firstOrNull()?.requestFocus()
                             }
                         }
                         true
                     }
+
                     KeyEvent.KEYCODE_DPAD_LEFT -> {
                         if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener true
                         if (event.repeatCount > 0) return@setOnKeyListener true
                         openSwipeRightApp()
                         true
                     }
+
                     KeyEvent.KEYCODE_DPAD_RIGHT -> {
                         if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener true
                         if (event.repeatCount > 0) return@setOnKeyListener true
                         openSwipeLeftApp()
                         true
                     }
+
                     KeyEvent.KEYCODE_ENTER,
                     KeyEvent.KEYCODE_DPAD_CENTER,
                     KeyEvent.KEYCODE_NUMPAD_ENTER -> {
@@ -503,13 +523,16 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                                 }
                                 true
                             }
+
                             KeyEvent.ACTION_UP -> {
                                 if (event.repeatCount == 0) view.performClick()
                                 true
                             }
+
                             else -> false
                         }
                     }
+
                     else -> false
                 }
             }
@@ -543,18 +566,21 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                         }
                         true
                     }
+
                     KeyEvent.KEYCODE_DPAD_LEFT -> {
                         if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener true
                         if (event.repeatCount > 0) return@setOnKeyListener true
                         openSwipeRightApp()
                         true
                     }
+
                     KeyEvent.KEYCODE_DPAD_RIGHT -> {
                         if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener true
                         if (event.repeatCount > 0) return@setOnKeyListener true
                         openSwipeLeftApp()
                         true
                     }
+
                     KeyEvent.KEYCODE_ENTER,
                     KeyEvent.KEYCODE_DPAD_CENTER,
                     KeyEvent.KEYCODE_NUMPAD_ENTER -> {
@@ -565,13 +591,16 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                                 }
                                 true
                             }
+
                             KeyEvent.ACTION_UP -> {
                                 if (event.repeatCount == 0) view.performClick()
                                 true
                             }
+
                             else -> false
                         }
                     }
+
                     else -> false
                 }
             }
@@ -644,7 +673,15 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
 
         binding.homeApp1.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp1 as TextView, prefs.appName1, prefs.appPackage1, prefs.appUser1, prefs.isShortcut1, prefs.shortcutId1)) {
+        if (!setHomeAppText(
+                binding.homeApp1 as TextView,
+                prefs.appName1,
+                prefs.appPackage1,
+                prefs.appUser1,
+                prefs.isShortcut1,
+                prefs.shortcutId1
+            )
+        ) {
             prefs.appName1 = ""
             prefs.appPackage1 = ""
         }
@@ -654,7 +691,15 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
 
         binding.homeApp2.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp2 as TextView, prefs.appName2, prefs.appPackage2, prefs.appUser2, prefs.isShortcut2, prefs.shortcutId2)) {
+        if (!setHomeAppText(
+                binding.homeApp2 as TextView,
+                prefs.appName2,
+                prefs.appPackage2,
+                prefs.appUser2,
+                prefs.isShortcut2,
+                prefs.shortcutId2
+            )
+        ) {
             prefs.appName2 = ""
             prefs.appPackage2 = ""
         }
@@ -664,7 +709,15 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
 
         binding.homeApp3.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp3 as TextView, prefs.appName3, prefs.appPackage3, prefs.appUser3, prefs.isShortcut3, prefs.shortcutId3)) {
+        if (!setHomeAppText(
+                binding.homeApp3 as TextView,
+                prefs.appName3,
+                prefs.appPackage3,
+                prefs.appUser3,
+                prefs.isShortcut3,
+                prefs.shortcutId3
+            )
+        ) {
             prefs.appName3 = ""
             prefs.appPackage3 = ""
         }
@@ -674,7 +727,15 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
 
         binding.homeApp4.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp4 as TextView, prefs.appName4, prefs.appPackage4, prefs.appUser4, prefs.isShortcut4, prefs.shortcutId4)) {
+        if (!setHomeAppText(
+                binding.homeApp4 as TextView,
+                prefs.appName4,
+                prefs.appPackage4,
+                prefs.appUser4,
+                prefs.isShortcut4,
+                prefs.shortcutId4
+            )
+        ) {
             prefs.appName4 = ""
             prefs.appPackage4 = ""
         }
@@ -684,7 +745,15 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
 
         binding.homeApp5.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp5 as TextView, prefs.appName5, prefs.appPackage5, prefs.appUser5, prefs.isShortcut5, prefs.shortcutId5)) {
+        if (!setHomeAppText(
+                binding.homeApp5 as TextView,
+                prefs.appName5,
+                prefs.appPackage5,
+                prefs.appUser5,
+                prefs.isShortcut5,
+                prefs.shortcutId5
+            )
+        ) {
             prefs.appName5 = ""
             prefs.appPackage5 = ""
         }
@@ -694,7 +763,15 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
 
         binding.homeApp6.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp6 as TextView, prefs.appName6, prefs.appPackage6, prefs.appUser6, prefs.isShortcut6, prefs.shortcutId6)) {
+        if (!setHomeAppText(
+                binding.homeApp6 as TextView,
+                prefs.appName6,
+                prefs.appPackage6,
+                prefs.appUser6,
+                prefs.isShortcut6,
+                prefs.shortcutId6
+            )
+        ) {
             prefs.appName6 = ""
             prefs.appPackage6 = ""
         }
@@ -704,7 +781,15 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
 
         binding.homeApp7.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp7 as TextView, prefs.appName7, prefs.appPackage7, prefs.appUser7, prefs.isShortcut7, prefs.shortcutId7)) {
+        if (!setHomeAppText(
+                binding.homeApp7 as TextView,
+                prefs.appName7,
+                prefs.appPackage7,
+                prefs.appUser7,
+                prefs.isShortcut7,
+                prefs.shortcutId7
+            )
+        ) {
             prefs.appName7 = ""
             prefs.appPackage7 = ""
         }
@@ -714,7 +799,15 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
 
         binding.homeApp8.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp8 as TextView, prefs.appName8, prefs.appPackage8, prefs.appUser8, prefs.isShortcut8, prefs.shortcutId8)) {
+        if (!setHomeAppText(
+                binding.homeApp8 as TextView,
+                prefs.appName8,
+                prefs.appPackage8,
+                prefs.appUser8,
+                prefs.isShortcut8,
+                prefs.shortcutId8
+            )
+        ) {
             prefs.appName8 = ""
             prefs.appPackage8 = ""
         }
@@ -939,6 +1032,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 showAppList(Constants.FLAG_LAUNCH_APP)
                 return
             }
+
             Constants.HomeAction.OPEN_PHONE -> {
                 openDialerApp(requireContext())
                 return

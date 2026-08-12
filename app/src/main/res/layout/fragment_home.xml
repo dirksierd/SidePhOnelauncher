@@ -29,7 +29,7 @@
 
         <TextClock
             android:id="@+id/clock"
-            style="@style/TextDefault"
+            style="@style/TextDefaultFocusableInverted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:focusable="true"
@@ -43,7 +43,7 @@
 
         <TextView
             android:id="@+id/date"
-            style="@style/TextDefault"
+            style="@style/TextDefaultFocusableInverted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:focusable="true"
@@ -84,7 +84,7 @@
 
         <app.sidephonelauncher.ui.HomeAppTextView
             android:id="@+id/homeApp1"
-            style="@style/TextLarge"
+            style="@style/TextLargeFocusableInverted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:focusable="true"
@@ -97,7 +97,7 @@
 
         <app.sidephonelauncher.ui.HomeAppTextView
             android:id="@+id/homeApp2"
-            style="@style/TextLarge"
+            style="@style/TextLargeFocusableInverted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:focusable="true"
@@ -110,7 +110,7 @@
 
         <app.sidephonelauncher.ui.HomeAppTextView
             android:id="@+id/homeApp3"
-            style="@style/TextLarge"
+            style="@style/TextLargeFocusableInverted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:focusable="true"
@@ -123,7 +123,7 @@
 
         <app.sidephonelauncher.ui.HomeAppTextView
             android:id="@+id/homeApp4"
-            style="@style/TextLarge"
+            style="@style/TextLargeFocusableInverted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:focusable="true"
@@ -136,7 +136,7 @@
 
         <app.sidephonelauncher.ui.HomeAppTextView
             android:id="@+id/homeApp5"
-            style="@style/TextLarge"
+            style="@style/TextLargeFocusableInverted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:focusable="true"
@@ -149,7 +149,7 @@
 
         <app.sidephonelauncher.ui.HomeAppTextView
             android:id="@+id/homeApp6"
-            style="@style/TextLarge"
+            style="@style/TextLargeFocusableInverted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:focusable="true"
@@ -162,7 +162,7 @@
 
         <app.sidephonelauncher.ui.HomeAppTextView
             android:id="@+id/homeApp7"
-            style="@style/TextLarge"
+            style="@style/TextLargeFocusableInverted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:focusable="true"
@@ -175,7 +175,7 @@
 
         <app.sidephonelauncher.ui.HomeAppTextView
             android:id="@+id/homeApp8"
-            style="@style/TextLarge"
+            style="@style/TextLargeFocusableInverted"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:focusable="true"

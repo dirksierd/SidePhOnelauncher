@@ -10,11 +10,14 @@
         android:id="@+id/appRow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:background="@drawable/bg_focus_inverted_selector"
+        android:defaultFocusHighlightEnabled="false"
         android:focusable="true"
         android:focusableInTouchMode="false"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="24dp"
+        android:paddingHorizontal="12dp"
         android:paddingVertical="@dimen/app_padding_vertical">
 
         <TextView
@@ -22,21 +25,28 @@
             style="@style/TextLarge"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:duplicateParentState="true"
             android:layout_weight="1"
             android:maxLines="1"
-            android:text="@string/app" />
+            android:shadowColor="@android:color/transparent"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="0"
+            android:text="@string/app"
+            android:textColor="@color/text_focus_inverted" />
     </LinearLayout>
 
     <ImageView
         android:id="@+id/otherProfileIndicator"
         android:layout_width="5dp"
         android:layout_height="5dp"
+        android:duplicateParentState="true"
         android:layout_gravity="center_vertical"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="22dp"
         android:layout_marginTop="1dp"
         android:gravity="center"
         android:src="@drawable/ic_rounded"
-        app:tint="?attr/primaryColor" />
+        app:tint="@color/icon_tint_focus_inverted" />
 
     <LinearLayout
         android:id="@+id/appHideLayout"

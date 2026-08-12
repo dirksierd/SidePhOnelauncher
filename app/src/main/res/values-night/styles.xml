@@ -75,6 +75,26 @@
         <item name="android:textSize">@dimen/text_large</item>
     </style>
 
+    <style name="TextDefaultFocusableInverted" parent="TextDefault">
+        <item name="android:background">@drawable/bg_focus_inverted_selector</item>
+        <item name="android:textColor">@color/text_focus_inverted</item>
+        <item name="android:shadowColor">@android:color/transparent</item>
+        <item name="android:shadowDx">0</item>
+        <item name="android:shadowDy">0</item>
+        <item name="android:shadowRadius">0</item>
+        <item name="android:defaultFocusHighlightEnabled">false</item>
+    </style>
+
+    <style name="TextLargeFocusableInverted" parent="TextLarge">
+        <item name="android:background">@drawable/bg_focus_inverted_selector</item>
+        <item name="android:textColor">@color/text_focus_inverted</item>
+        <item name="android:shadowColor">@android:color/transparent</item>
+        <item name="android:shadowDx">0</item>
+        <item name="android:shadowDy">0</item>
+        <item name="android:shadowRadius">0</item>
+        <item name="android:defaultFocusHighlightEnabled">false</item>
+    </style>
+
     <style name="TextMedium" parent="TextDefault">
         <item name="android:textSize">20sp</item>
     </style>

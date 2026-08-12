@@ -57,6 +57,7 @@ class MainActivity : AppCompatActivity() {
     private var timerJob: Job? = null
     private var isResumed = false
     private var profileReceiver: BroadcastReceiver? = null
+    private var screenStateReceiver: BroadcastReceiver? = null
 
 //    override fun onBackPressed() {
 //        if (navController.currentDestination?.id != R.id.mainFragment)
@@ -126,6 +127,22 @@ class MainActivity : AppCompatActivity() {
             }
             registerReceiver(profileReceiver, filter)
         }
+
+        screenStateReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                when (intent?.action) {
+                    Intent.ACTION_SCREEN_OFF,
+                    Intent.ACTION_USER_PRESENT -> viewModel.requestFirstHomeAppFocus()
+                }
+            }
+        }
+        registerReceiver(
+            screenStateReceiver,
+            IntentFilter().apply {
+                addAction(Intent.ACTION_SCREEN_OFF)
+                addAction(Intent.ACTION_USER_PRESENT)
+            }
+        )
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
@@ -416,6 +433,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         profileReceiver?.let {
+            try {
+                unregisterReceiver(it)
+            } catch (_: Exception) {
+            }
+        }
+        screenStateReceiver?.let {
             try {
                 unregisterReceiver(it)
             } catch (_: Exception) {

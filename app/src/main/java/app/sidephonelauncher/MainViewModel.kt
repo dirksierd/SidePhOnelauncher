@@ -59,11 +59,30 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     // Suppress backToHomeScreen during Private Space lock/unlock auth
     var isPrivateSpaceToggling = false
 
+    var lastHomeFocusedViewId: Int? = null
+        private set
+
+    private var resetHomeFocusToFirstApp = false
+
     val showDialog = SingleLiveEvent<String>()
     val checkForMessages = SingleLiveEvent<Unit?>()
     val resetLauncherLiveData = SingleLiveEvent<Unit?>()
     // Home button for recents feature disabled
     // val showRecentApps = SingleLiveEvent<Unit?>()
+
+    fun setLastHomeFocusedView(viewId: Int) {
+        lastHomeFocusedViewId = viewId
+    }
+
+    fun requestFirstHomeAppFocus() {
+        resetHomeFocusToFirstApp = true
+    }
+
+    fun consumeResetHomeFocusToFirstApp(): Boolean {
+        val shouldReset = resetHomeFocusToFirstApp
+        resetHomeFocusToFirstApp = false
+        return shouldReset
+    }
 
     fun selectedApp(appModel: AppModel, flag: Int) {
         if (appModel is AppModel.PrivateSpaceHeader || appModel is AppModel.Spacer) return

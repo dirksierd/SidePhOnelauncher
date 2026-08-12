@@ -218,7 +218,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         binding.mainLayout.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 binding.mainLayout.post {
-                    redirectRootFocusToHomeAppSafely()
+                    redirectRootFocusToHomeTargetSafely()
                 }
             }
         }
@@ -249,12 +249,10 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val focusedView = activity?.currentFocus
         return focusedView == null
             || focusedView == binding.mainLayout
-            || getVisibleHomeApps().none { it == focusedView }
+            || getFocusableHomeTargets().none { it == focusedView }
     }
 
     fun handleUnfocusedDpadKeyEvent(event: KeyEvent): Boolean {
-        val visibleApps = getVisibleHomeApps()
-        if (visibleApps.isEmpty()) return false
         return when (event.keyCode) {
             KeyEvent.KEYCODE_DPAD_LEFT -> {
                 if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
@@ -274,7 +272,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             KeyEvent.KEYCODE_ENTER,
             KeyEvent.KEYCODE_NUMPAD_ENTER -> {
                 if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
-                    redirectRootFocusToHomeAppSafely()
+                    redirectRootFocusToHomeTargetSafely()
                 }
                 true
             }
@@ -284,7 +282,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     private fun handleHomeKeyEvent(keyCode: Int, event: KeyEvent): Boolean {
         val visibleApps = getVisibleHomeApps()
-        if (visibleApps.isEmpty()) return false
 
         if (activity?.currentFocus == binding.mainLayout) {
             when (keyCode) {
@@ -294,7 +291,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 KeyEvent.KEYCODE_ENTER,
                 KeyEvent.KEYCODE_NUMPAD_ENTER -> {
                     if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
-                        redirectRootFocusToHomeAppSafely()
+                        redirectRootFocusToHomeTargetSafely()
                     }
                     return true
                 }
@@ -320,10 +317,10 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 when (keyCode) {
                     KeyEvent.KEYCODE_DPAD_UP -> {
                         if (event.repeatCount > 0) return true
-                        if (focusedIndex > 0) {
-                            visibleApps[focusedIndex - 1].requestFocus()
-                        } else {
-                            swipeDownAction()
+                        when {
+                            focusedIndex > 0 -> visibleApps[focusedIndex - 1].requestFocus()
+                            focusedIndex == 0 -> getBottomHomeHeaderTarget()?.requestFocus() ?: swipeDownAction()
+                            else -> return false
                         }
                         return true
                     }
@@ -364,22 +361,55 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun requestInitialFocus() {
-        if (binding.mainLayout.isInTouchMode) return
-        redirectRootFocusToHomeAppSafely()
+        binding.mainLayout.post {
+            ensureHomeFocus()
+        }
     }
 
-    private fun redirectRootFocusToHomeAppSafely() {
-        val binding = _binding ?: return
-        listOf(
-            binding.homeApp1,
-            binding.homeApp2,
-            binding.homeApp3,
-            binding.homeApp4,
-            binding.homeApp5,
-            binding.homeApp6,
-            binding.homeApp7,
-            binding.homeApp8,
-        ).firstOrNull { it.visibility == View.VISIBLE }?.requestFocus()
+    fun ensureHomeFocus(): Boolean {
+        val target = getPreferredHomeFocusTarget() ?: return false
+        val focusedView = activity?.currentFocus
+        if (focusedView == target && target.hasFocus()) return true
+        return target.requestFocus()
+    }
+
+    private fun rememberHomeFocus(view: View, hasFocus: Boolean) {
+        if (!hasFocus) return
+        viewModel.setLastHomeFocusedView(view.id)
+    }
+
+    private fun redirectRootFocusToHomeTargetSafely() {
+        ensureHomeFocus()
+    }
+
+    private fun getPreferredHomeFocusTarget(): View? {
+        val firstVisibleHomeApp = getVisibleHomeApps().firstOrNull()
+        if (viewModel.consumeResetHomeFocusToFirstApp()) {
+            return firstVisibleHomeApp ?: getTopHomeHeaderTargets().firstOrNull()
+        }
+
+        val rememberedTarget = viewModel.lastHomeFocusedViewId
+            ?.let { binding.root.findViewById<View>(it) }
+            ?.takeIf { it.visibility == View.VISIBLE && it.isFocusable }
+
+        return rememberedTarget
+            ?: firstVisibleHomeApp
+            ?: getTopHomeHeaderTargets().firstOrNull()
+    }
+
+    private fun getBottomHomeHeaderTarget(): View? {
+        return getTopHomeHeaderTargets().lastOrNull()
+    }
+
+    private fun getTopHomeHeaderTargets(): List<View> {
+        return buildList {
+            if (binding.clock.isVisible) add(binding.clock)
+            if (binding.date.isVisible) add(binding.date)
+        }
+    }
+
+    private fun getFocusableHomeTargets(): List<View> {
+        return getTopHomeHeaderTargets() + getVisibleHomeApps()
     }
 
     private fun getVisibleHomeApps(): List<View> {
@@ -414,10 +444,76 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         binding.date.setOnClickListener(this)
         binding.clock.setOnLongClickListener(this)
         binding.date.setOnLongClickListener(this)
+        binding.clock.onFocusChangeListener = View.OnFocusChangeListener { view, hasFocus ->
+            rememberHomeFocus(view, hasFocus)
+        }
+        binding.date.onFocusChangeListener = View.OnFocusChangeListener { view, hasFocus ->
+            rememberHomeFocus(view, hasFocus)
+        }
         binding.setDefaultLauncher.setOnClickListener(this)
         binding.setDefaultLauncher.setOnLongClickListener(this)
         binding.tvScreenTime.setOnClickListener(this)
         binding.tvScreenTime.setOnLongClickListener(this)
+
+        listOf(binding.clock, binding.date).forEach { headerView ->
+            headerView.setOnKeyListener { view, keyCode, event ->
+                when (keyCode) {
+                    KeyEvent.KEYCODE_DPAD_UP -> {
+                        if (event.action != KeyEvent.ACTION_DOWN || event.repeatCount > 0) return@setOnKeyListener true
+                        val headerTargets = getTopHomeHeaderTargets()
+                        val currentIndex = headerTargets.indexOf(view)
+                        if (currentIndex > 0) {
+                            headerTargets[currentIndex - 1].requestFocus()
+                        }
+                        true
+                    }
+                    KeyEvent.KEYCODE_DPAD_DOWN -> {
+                        if (event.action != KeyEvent.ACTION_DOWN || event.repeatCount > 0) return@setOnKeyListener true
+                        val headerTargets = getTopHomeHeaderTargets()
+                        val currentIndex = headerTargets.indexOf(view)
+                        when {
+                            currentIndex in 0 until headerTargets.lastIndex -> {
+                                headerTargets[currentIndex + 1].requestFocus()
+                            }
+                            else -> {
+                                getVisibleHomeApps().firstOrNull()?.requestFocus()
+                            }
+                        }
+                        true
+                    }
+                    KeyEvent.KEYCODE_DPAD_LEFT -> {
+                        if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener true
+                        if (event.repeatCount > 0) return@setOnKeyListener true
+                        openSwipeRightApp()
+                        true
+                    }
+                    KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                        if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener true
+                        if (event.repeatCount > 0) return@setOnKeyListener true
+                        openSwipeLeftApp()
+                        true
+                    }
+                    KeyEvent.KEYCODE_ENTER,
+                    KeyEvent.KEYCODE_DPAD_CENTER,
+                    KeyEvent.KEYCODE_NUMPAD_ENTER -> {
+                        when (event.action) {
+                            KeyEvent.ACTION_DOWN -> {
+                                if (event.repeatCount > 0) {
+                                    view.performLongClick()
+                                }
+                                true
+                            }
+                            KeyEvent.ACTION_UP -> {
+                                if (event.repeatCount == 0) view.performClick()
+                                true
+                            }
+                            else -> false
+                        }
+                    }
+                    else -> false
+                }
+            }
+        }
 
         listOf(
             binding.homeApp1,
@@ -431,6 +527,9 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         ).forEach { homeApp ->
             homeApp.setOnClickListener(this)
             homeApp.setOnLongClickListener(this)
+            homeApp.onFocusChangeListener = View.OnFocusChangeListener { view, hasFocus ->
+                rememberHomeFocus(view, hasFocus)
+            }
             homeApp.setOnKeyListener { view, keyCode, event ->
                 when (keyCode) {
                     KeyEvent.KEYCODE_DPAD_DOWN -> {
@@ -539,62 +638,87 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             populateScreenTime()
 
         val homeAppsNum = prefs.homeAppsNum
-        if (homeAppsNum == 0) return
+        if (homeAppsNum == 0) {
+            binding.mainLayout.post { ensureHomeFocus() }
+            return
+        }
 
         binding.homeApp1.visibility = View.VISIBLE
         if (!setHomeAppText(binding.homeApp1 as TextView, prefs.appName1, prefs.appPackage1, prefs.appUser1, prefs.isShortcut1, prefs.shortcutId1)) {
             prefs.appName1 = ""
             prefs.appPackage1 = ""
         }
-        if (homeAppsNum == 1) return
+        if (homeAppsNum == 1) {
+            binding.mainLayout.post { ensureHomeFocus() }
+            return
+        }
 
         binding.homeApp2.visibility = View.VISIBLE
         if (!setHomeAppText(binding.homeApp2 as TextView, prefs.appName2, prefs.appPackage2, prefs.appUser2, prefs.isShortcut2, prefs.shortcutId2)) {
             prefs.appName2 = ""
             prefs.appPackage2 = ""
         }
-        if (homeAppsNum == 2) return
+        if (homeAppsNum == 2) {
+            binding.mainLayout.post { ensureHomeFocus() }
+            return
+        }
 
         binding.homeApp3.visibility = View.VISIBLE
         if (!setHomeAppText(binding.homeApp3 as TextView, prefs.appName3, prefs.appPackage3, prefs.appUser3, prefs.isShortcut3, prefs.shortcutId3)) {
             prefs.appName3 = ""
             prefs.appPackage3 = ""
         }
-        if (homeAppsNum == 3) return
+        if (homeAppsNum == 3) {
+            binding.mainLayout.post { ensureHomeFocus() }
+            return
+        }
 
         binding.homeApp4.visibility = View.VISIBLE
         if (!setHomeAppText(binding.homeApp4 as TextView, prefs.appName4, prefs.appPackage4, prefs.appUser4, prefs.isShortcut4, prefs.shortcutId4)) {
             prefs.appName4 = ""
             prefs.appPackage4 = ""
         }
-        if (homeAppsNum == 4) return
+        if (homeAppsNum == 4) {
+            binding.mainLayout.post { ensureHomeFocus() }
+            return
+        }
 
         binding.homeApp5.visibility = View.VISIBLE
         if (!setHomeAppText(binding.homeApp5 as TextView, prefs.appName5, prefs.appPackage5, prefs.appUser5, prefs.isShortcut5, prefs.shortcutId5)) {
             prefs.appName5 = ""
             prefs.appPackage5 = ""
         }
-        if (homeAppsNum == 5) return
+        if (homeAppsNum == 5) {
+            binding.mainLayout.post { ensureHomeFocus() }
+            return
+        }
 
         binding.homeApp6.visibility = View.VISIBLE
         if (!setHomeAppText(binding.homeApp6 as TextView, prefs.appName6, prefs.appPackage6, prefs.appUser6, prefs.isShortcut6, prefs.shortcutId6)) {
             prefs.appName6 = ""
             prefs.appPackage6 = ""
         }
-        if (homeAppsNum == 6) return
+        if (homeAppsNum == 6) {
+            binding.mainLayout.post { ensureHomeFocus() }
+            return
+        }
 
         binding.homeApp7.visibility = View.VISIBLE
         if (!setHomeAppText(binding.homeApp7 as TextView, prefs.appName7, prefs.appPackage7, prefs.appUser7, prefs.isShortcut7, prefs.shortcutId7)) {
             prefs.appName7 = ""
             prefs.appPackage7 = ""
         }
-        if (homeAppsNum == 7) return
+        if (homeAppsNum == 7) {
+            binding.mainLayout.post { ensureHomeFocus() }
+            return
+        }
 
         binding.homeApp8.visibility = View.VISIBLE
         if (!setHomeAppText(binding.homeApp8 as TextView, prefs.appName8, prefs.appPackage8, prefs.appUser8, prefs.isShortcut8, prefs.shortcutId8)) {
             prefs.appName8 = ""
             prefs.appPackage8 = ""
         }
+        binding.mainLayout.post { ensureHomeFocus() }
     }
 
     private fun setHomeAppText(
@@ -683,7 +807,10 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             binding.homeApp6,
             binding.homeApp7,
             binding.homeApp8,
-        ).forEach { it.isFocusable = true }
+        ).forEach {
+            it.isFocusable = true
+            it.isFocusableInTouchMode = true
+        }
     }
 
     private fun hideHomeApps() {
@@ -699,6 +826,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         ).forEach {
             it.visibility = View.GONE
             it.isFocusable = false
+            it.isFocusableInTouchMode = false
         }
     }
 

@@ -55,6 +55,7 @@ class AppDrawerFragment : Fragment() {
     private var currentPrivateSpaceApps: List<AppModel>? = null
     private var currentPrivateSpaceLocked: Boolean = true
     private var currentPrivateSpaceAvailable: Boolean = false
+    private var pendingInitialListFocus: Boolean = false
 
     private val viewModel: MainViewModel by activityViewModels()
     private var _binding: FragmentAppDrawerBinding? = null
@@ -186,6 +187,7 @@ class AppDrawerFragment : Fragment() {
     }
 
     private fun focusSearchInput() {
+        setSearchFocusEnabled(true)
         binding.search.isIconified = false
         binding.search.requestFocus()
         searchTextView?.apply {
@@ -193,6 +195,16 @@ class AppDrawerFragment : Fragment() {
             setSelection(text?.length ?: 0)
         }
         binding.search.showKeyboard(prefs.autoShowKeyboard)
+    }
+
+    private fun setSearchFocusEnabled(enabled: Boolean) {
+        binding.search.isFocusable = enabled
+        binding.search.isFocusableInTouchMode = enabled
+        searchTextView?.apply {
+            isFocusable = enabled
+            isFocusableInTouchMode = enabled
+            isCursorVisible = enabled
+        }
     }
 
     private fun initViews() {
@@ -208,6 +220,7 @@ class AppDrawerFragment : Fragment() {
             searchTextView?.typeface = Typeface.DEFAULT
             searchTextView?.imeOptions =
                 EditorInfo.IME_ACTION_SEARCH or EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
+            setSearchFocusEnabled(prefs.autoShowKeyboard)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -218,6 +231,12 @@ class AppDrawerFragment : Fragment() {
             findNavController().popBackStack()
             true
         }
+        val enableSearchFocusOnTouch = View.OnTouchListener { _, _ ->
+            setSearchFocusEnabled(true)
+            false
+        }
+        binding.search.setOnTouchListener(enableSearchFocusOnTouch)
+        searchTextView?.setOnTouchListener(enableSearchFocusOnTouch)
         binding.search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (query?.startsWith("!") == true)
@@ -400,6 +419,7 @@ class AppDrawerFragment : Fragment() {
             viewModel.hiddenApps.observe(viewLifecycleOwner) {
                 it?.let {
                     adapter.setAppList(it.toMutableList())
+                    maybeFocusInitialListItem()
                 }
             }
         } else {
@@ -451,6 +471,7 @@ class AppDrawerFragment : Fragment() {
 
         adapter.setAppList(combined)
         adapter.filter.filter(binding.search.query)
+        maybeFocusInitialListItem()
     }
 
     private fun findFirstLaunchablePosition(): Int {
@@ -519,7 +540,7 @@ class AppDrawerFragment : Fragment() {
             val name = binding.search.query.toString().trim()
             if (name.isEmpty()) {
                 requireContext().showToast(getString(R.string.type_a_new_app_name_first))
-                binding.search.showKeyboard()
+                focusSearchInput()
                 return@setOnClickListener
             }
 
@@ -568,7 +589,24 @@ class AppDrawerFragment : Fragment() {
             viewModel.checkForMessages.call()
     }
 
-    private fun requestInitialSearchFocus() {
+    private fun maybeFocusInitialListItem() {
+        if (!pendingInitialListFocus || prefs.autoShowKeyboard) return
+        if (focusFirstLaunchableItem()) {
+            pendingInitialListFocus = false
+        }
+    }
+
+    private fun applyInitialDrawerFocus() {
+        if (!prefs.autoShowKeyboard) {
+            pendingInitialListFocus = true
+            setSearchFocusEnabled(false)
+            binding.search.clearFocus()
+            searchTextView?.clearFocus()
+            maybeFocusInitialListItem()
+            return
+        }
+
+        pendingInitialListFocus = false
         binding.search.post {
             binding.search.isIconified = false
             binding.search.requestFocus()
@@ -578,19 +616,19 @@ class AppDrawerFragment : Fragment() {
                 requestFocus()
                 setSelection(text?.length ?: 0)
             }
+            binding.search.showKeyboard(true)
         }
     }
 
     override fun onStart() {
         super.onStart()
         cachedIsCjkKeyboard = null
-        requestInitialSearchFocus()
-        binding.search.showKeyboard(prefs.autoShowKeyboard)
+        applyInitialDrawerFocus()
     }
 
     override fun onResume() {
         super.onResume()
-        requestInitialSearchFocus()
+        applyInitialDrawerFocus()
     }
 
     override fun onStop() {

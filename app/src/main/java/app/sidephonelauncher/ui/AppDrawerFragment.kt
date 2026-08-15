@@ -203,7 +203,7 @@ class AppDrawerFragment : Fragment() {
         searchTextView?.apply {
             isFocusable = enabled
             isFocusableInTouchMode = enabled
-            isCursorVisible = enabled
+            isCursorVisible = false
         }
     }
 
@@ -220,6 +220,7 @@ class AppDrawerFragment : Fragment() {
             searchTextView?.typeface = Typeface.DEFAULT
             searchTextView?.imeOptions =
                 EditorInfo.IME_ACTION_SEARCH or EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
+            searchTextView?.isCursorVisible = false
             setSearchFocusEnabled(prefs.autoShowKeyboard)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -527,6 +528,8 @@ class AppDrawerFragment : Fragment() {
     private fun focusRecyclerItem(position: Int, attempt: Int = 0) {
         binding.recyclerView.scrollToPosition(position)
         binding.recyclerView.post {
+            val binding = _binding ?: return@post
+            if (!isAdded) return@post
             val holder = binding.recyclerView.findViewHolderForAdapterPosition(position)
             val itemView = holder?.itemView?.findViewById<View>(R.id.appRow) ?: holder?.itemView
             if (itemView != null) {
@@ -610,6 +613,8 @@ class AppDrawerFragment : Fragment() {
 
         pendingInitialListFocus = false
         binding.search.post {
+            val binding = _binding ?: return@post
+            if (!isAdded) return@post
             binding.search.isIconified = false
             binding.search.requestFocus()
             searchTextView?.apply {

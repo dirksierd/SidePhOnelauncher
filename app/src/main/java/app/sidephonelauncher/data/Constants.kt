@@ -9,6 +9,7 @@ object Constants {
 
     object Dialog {
         const val ABOUT = "ABOUT"
+        const val HOME_TIPS = "HOME_TIPS"
         const val WALLPAPER = "WALLPAPER"
         const val REVIEW = "REVIEW"
         const val RATE = "RATE"

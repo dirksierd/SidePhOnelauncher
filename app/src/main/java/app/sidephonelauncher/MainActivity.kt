@@ -261,6 +261,16 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
+                Constants.Dialog.HOME_TIPS -> {
+                    showMessageDialog(
+                        R.string.app_name,
+                        R.string.swipe_up_for_apps,
+                        R.string.okay
+                    ) {
+                        binding.messageLayout.visibility = View.GONE
+                    }
+                }
+
                 Constants.Dialog.WALLPAPER -> {
                     prefs.wallpaperMsgShown = true
                     prefs.userState = Constants.UserState.REVIEW

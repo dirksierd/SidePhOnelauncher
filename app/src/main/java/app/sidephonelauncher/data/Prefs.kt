@@ -168,11 +168,11 @@ class Prefs(context: Context) {
         set(value) = prefs.edit { putInt(HOME_APPS_NUM, value).apply() }
 
     var homeAlignment: Int
-        get() = prefs.getInt(HOME_ALIGNMENT, Gravity.START)
+        get() = prefs.getInt(HOME_ALIGNMENT, Gravity.CENTER)
         set(value) = prefs.edit { putInt(HOME_ALIGNMENT, value).apply() }
 
     var homeBottomAlignment: Boolean
-        get() = prefs.getBoolean(HOME_BOTTOM_ALIGNMENT, false)
+        get() = prefs.getBoolean(HOME_BOTTOM_ALIGNMENT, true)
         set(value) = prefs.edit { putBoolean(HOME_BOTTOM_ALIGNMENT, value).apply() }
 
     var appLabelAlignment: Int

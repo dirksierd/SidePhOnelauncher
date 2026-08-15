@@ -621,13 +621,6 @@ class SettingsFragment : Fragment(), View.OnClickListener, View.OnLongClickListe
     }
 
     private fun updateHomeBottomAlignment() {
-        if (viewModel.isSidePhOnelauncherDefault.value != true) {
-            requireContext().showToast(
-                getString(R.string.please_set_sidephonelauncher_as_default_first),
-                Toast.LENGTH_LONG
-            )
-            return
-        }
         prefs.homeBottomAlignment = !prefs.homeBottomAlignment
         populateAlignment()
         viewModel.updateHomeAlignment(prefs.homeAlignment)

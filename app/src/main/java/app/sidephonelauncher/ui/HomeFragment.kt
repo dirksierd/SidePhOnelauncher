@@ -188,11 +188,15 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun initObservers() {
-        if (prefs.firstSettingsOpen) {
-            binding.firstRunTips.visibility = View.VISIBLE
-            binding.setDefaultLauncher.visibility = View.GONE
-        } else binding.firstRunTips.visibility = View.GONE
+        binding.firstRunTips.visibility = View.GONE
+        binding.setDefaultLauncher.visibility = View.GONE
 
+        viewModel.firstOpen.observe(viewLifecycleOwner) {
+            if (it == true) {
+                viewModel.showDialog.postValue(Constants.Dialog.HOME_TIPS)
+                viewModel.firstOpen(false)
+            }
+        }
         viewModel.refreshHome.observe(viewLifecycleOwner) {
             populateHomeScreen(it)
         }
@@ -202,11 +206,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                     prefs.dailyWallpaper = false
                     viewModel.cancelWallpaperWorker()
                 }
-                prefs.homeBottomAlignment = false
-                setHomeAlignment()
             }
-            if (binding.firstRunTips.isVisible) return@Observer
-            binding.setDefaultLauncher.isVisible = it.not() && prefs.hideSetDefaultLauncher.not()
+            binding.setDefaultLauncher.isVisible = false
         })
         viewModel.homeAppAlignment.observe(viewLifecycleOwner) {
             setHomeAlignment(it)

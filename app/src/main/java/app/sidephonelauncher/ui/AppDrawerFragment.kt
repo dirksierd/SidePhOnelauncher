@@ -491,7 +491,6 @@ class AppDrawerFragment : Fragment() {
         if (position == RecyclerView.NO_POSITION) return false
 
         dismissSearchInput()
-        binding.recyclerView.requestFocus()
         focusRecyclerItem(position)
         return true
     }
@@ -505,7 +504,6 @@ class AppDrawerFragment : Fragment() {
             return true
         }
 
-        binding.recyclerView.requestFocus()
         focusRecyclerItem(targetPosition)
         return true
     }
@@ -526,12 +524,16 @@ class AppDrawerFragment : Fragment() {
         return RecyclerView.NO_POSITION
     }
 
-    private fun focusRecyclerItem(position: Int) {
+    private fun focusRecyclerItem(position: Int, attempt: Int = 0) {
         binding.recyclerView.scrollToPosition(position)
         binding.recyclerView.post {
             val holder = binding.recyclerView.findViewHolderForAdapterPosition(position)
             val itemView = holder?.itemView?.findViewById<View>(R.id.appRow) ?: holder?.itemView
-            itemView?.requestFocus()
+            if (itemView != null) {
+                itemView.requestFocus()
+            } else if (attempt < 3) {
+                focusRecyclerItem(position, attempt + 1)
+            }
         }
     }
 
